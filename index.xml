@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ryan Derr&#39;s Blog</title>
+    <link>http://ryanderr.github.io/</link>
+    <description>Recent content on Ryan Derr&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 17 Mar 2024 14:41:01 -0500</lastBuildDate><atom:link href="http://ryanderr.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>About Me</title>
+      <link>http://ryanderr.github.io/about/</link>
+      <pubDate>Sun, 17 Mar 2024 14:41:01 -0500</pubDate>
+      
+      <guid>http://ryanderr.github.io/about/</guid>
+      <description>Introduction My name is James Derr, but I&amp;rsquo;m more commonly known as Ryan. I am a dedicated software engineer with a passion for continuous learning and knowledge sharing. When I&amp;rsquo;m not coding, I enjoy outdoor activities such as bouldering and paddle boarding, and I&amp;rsquo;m also an avid participant in Dungeons and Dragons campaigns.
+Professional Experience  Software Engineer at General Motors Database Administrator at Paycom Payroll  Technical Skills Programming Languages  Java Python Go TypeScript  Cloud Platforms  Azure AWS DigitalOcean  Tools and Frameworks  Spring Quarkus Apache Camel SQL Kafka Git  Development Lifecycle  Kubernetes Docker Terraform ArgoCD Helm CI/CD Pipelines  </description>
+    </item>
+    
+    <item>
+      <title>AWS Wireguard Vpn Via Terraform</title>
+      <link>http://ryanderr.github.io/posts/aws-wireguard-vpn-terraform/</link>
+      <pubDate>Sat, 30 Dec 2023 12:30:35 -0500</pubDate>
+      
+      <guid>http://ryanderr.github.io/posts/aws-wireguard-vpn-terraform/</guid>
+      <description>Introducing the EC2 WireGuard VPN Terraform Module In the ever-evolving landscape of the digital age, ensuring secure and efficient communication is paramount. Virtual Private Networks (VPNs) play a crucial role in establishing secure connections, and with the rise of cloud services, creating VPN solutions leveraging the cloud is easier than ever. Today, I am excited to introduce a powerful tool that simplifies the process of setting up a WireGuard VPN on an AWS EC2 instance – my open source EC2 WireGuard VPN Terraform Module.</description>
+    </item>
+    
+    <item>
+      <title>AWS ECS Faster &amp; Prolonged Shutdown Efficiency</title>
+      <link>http://ryanderr.github.io/posts/aws-ec2-shutdown-efficiency/</link>
+      <pubDate>Sun, 30 Jul 2023 12:38:29 -0500</pubDate>
+      
+      <guid>http://ryanderr.github.io/posts/aws-ec2-shutdown-efficiency/</guid>
+      <description>Introduction Containerization has revolutionized the way applications are deployed and managed, providing enhanced scalability and agility. Amazon Elastic Container Service (ECS), a highly scalable and fully managed container orchestration service, is at the forefront of this container revolution. In June 2023, AWS announced a significant improvement to Amazon ECS, introducing faster and prolonged shutdown capabilities for tasks. This update aims to optimize resource utilization and enhance the overall efficiency of container management.</description>
+    </item>
+    
+    <item>
+      <title>GitHub Pages vs. Vercel: Choosing the Right Platform for Your Website</title>
+      <link>http://ryanderr.github.io/posts/gh-vs-vercel/</link>
+      <pubDate>Sun, 16 Jul 2023 12:36:58 -0500</pubDate>
+      
+      <guid>http://ryanderr.github.io/posts/gh-vs-vercel/</guid>
+      <description>Introduction In the world of web development, choosing the right platform to host your website is crucial. Two popular options are GitHub Pages and Vercel. Both platforms offer powerful features, but they have distinct differences that can impact your decision. In this blog post, we will explore when to use GitHub Pages and Vercel, along with their benefits and drawbacks, helping you make an informed choice for your web hosting needs.</description>
+    </item>
+    
+    <item>
+      <title>A Case For PoshGit</title>
+      <link>http://ryanderr.github.io/posts/posh-git/</link>
+      <pubDate>Thu, 16 Mar 2023 12:42:42 -0500</pubDate>
+      
+      <guid>http://ryanderr.github.io/posts/posh-git/</guid>
+      <description>As developers, our daily workflow often revolves around Git and I&amp;rsquo;m no different. It&amp;rsquo;s the go-to version control system for managing code changes, collaborating with teammates, and ensuring project integrity. While I always lean toward using systems that run Bash (shoutout to Unix), that&amp;rsquo;s not always an option and using Git from the command line can be tedious and time-consuming. Enter PoshGit - a PowerShell module designed to enhance your Git experience and streamline your workflow.</description>
+    </item>
+    
+  </channel>
+</rss>

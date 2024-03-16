@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <title>AWS Wireguard Vpn Via Terraform - Ryan Derr&#39;s Blog</title>
+
+    
+    
+    <meta name="description" content="Introducing the EC2 WireGuard VPN Terraform Module In the ever-evolving landscape of the digital age, ensuring secure and efficient communication is paramount. Virtual Private Networks (VPNs) play a crucial role in establishing secure connections, and with the rise of cloud services, creating VPN solutions leveraging the cloud is easier than ever. Today, I am excited to introduce a powerful tool that simplifies the process of setting up a WireGuard VPN on an AWS EC2 instance – my open source EC2 WireGuard VPN Terraform Module." />
+    <meta name="author" content="Ryan Derr" />
+    
+
+    <link href="https://unpkg.com/@master/normal.css" rel="stylesheet">
+    <script src="https://unpkg.com/@master/style@1.5.0"></script>
+    <script src="https://unpkg.com/@master/styles@1.13.0"></script>
+    <script src="https://unpkg.com/master-styles-group"></script>
+    <script src="https://unpkg.com/themes.js"></script>
+    <script>window.themes = window.themes || new window.Themes()</script>
+
+    <style>
+        :root {
+            --font-sans: "Inter var", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+        }
+    </style></head>
+<body class="bg:fade-84@dark font:fade-16@dark font:sans">
+    <nav class="w:full h:90 fixed bg:fade-84/.95@dark bg:white z:1000">
+    <div class="
+        h:full
+        w:full
+        max-w:1200
+        mx:auto
+        px:32
+        d:flex
+        align-items:center
+    ">
+        <div>
+            <a href="/" class="mr-3 font:extralight">
+              
+              Ryan Derr&#39;s Blog
+              
+            </a>
+        </div>
+
+        <div class="ml:auto">
+            
+            
+            
+        </div>
+    </div>
+</nav>
+<div class="d:flex flex:column@<=sm pt:90 px:24 jc:center gap:44 word-break:break-word">
+        <div class="max-w:700 w:full box:content-box">
+<article class="box:border-box pt:32">
+    <header class="mb:32">
+        <div class="font:40 font:extrabold">AWS Wireguard Vpn Via Terraform</div>
+        <div class="mt:16 f:fade-60">
+            <time>Dec 30, 2023</time>
+            </div>
+    </header><div class="
+    _:where(a):hover{text-decoration-color:fade}
+    _:where(a){text-decoration:2;underline;fade-10;_text-decoration-color:fade-70@dark}
+    _:where(blockquote){bl:5;solid;fade-76/.1;_bl:5;solid;fade-34/.1@dark}
+    _:where(code){font:90%;_v:middle}
+    _:where(code:not(.highlight_*,pre_*)){p:2;6;_r:4}
+    _:where(del){text-decoration:1;line-through;fade-68;_text-decoration-color:red-64@dark}
+    _:where(figcaption){text:14;_p:10;20;0;_width:fit;_mx:auto;_font:fade-56;_font:fade-57@dark}
+    _:where(h1){font:40;_font:extrabold}
+    _:where(h1,h2,h3)+:where(h1,h2,h3){mt:.5em}
+    _:where(h1,h2,h3,h4,h5,h6){mt:2em}
+    _:where(h2){mb:1em;_font:32}
+    _:where(h3){font:24}
+    _:where(h4){font:20}
+    _:where(h5){font:16}
+    _:where(h6){font:14}
+    _:where(li)::marker{font:fade-44;_font:fade-68@dark}
+    _:where(li){pl:.375em}
+    _:where(mark){text-decoration:1;underline;#fce016;_bg:transparent;_text-decoration-color:rgb(252;224;22/.5)@dark}
+    _:where(p,li){font:fade-76;_font:16;_line-height:1.65;_font:fade-34@dark}
+    _:where(p,pre,blockquote,figure,ul,ol,table){my:1.125em}
+    >:first-child{mt:0!}
+    _:where(pre){p:20;_r:8;_overflow:auto}
+    _:where(pre,code:not(.highlight_*)){bg:fade-2;_bg:fade-92!@dark}
+    _:where(strong,b,a,code:not(.highlight_*),mark,del){font:fade-92;_font:fade-12@dark}
+    _:where(table){width:full;_border-spacing:0}
+    _:where(td){v:baseline}
+    _:where(td,th):first-child{pl:0}
+    _:where(td,th):last-child{pr:0}
+    _:where(td,th){bb:1;solid;fade-92/.06;_p:6;_b:fade-4/.04@dark}
+    _:where(th){font:fade-78;_font:14;_text:left;_font:fade-12@dark}
+    _:where(th,p_code,li_code,a,mark){font:semibold;_font:medium@dark}
+    _:where(ul){list-style-type:disc}
+    _:where(ul,ol,blockquote){pl:1.5em}
+    _:where(video,img){max-width:full}
+    _:where(a,mark){text-underline-offset:3}
+    _:where(hr){h:2;_bg:fade-10;_bg:fade-70@dark;_my:3em}
+"><h2 id="introducing-the-ec2-wireguard-vpn-terraform-module">Introducing the EC2 WireGuard VPN Terraform Module</h2>
+<p>In the ever-evolving landscape of the digital age, ensuring secure and efficient communication is paramount. Virtual Private Networks (VPNs) play a crucial role in establishing secure connections, and with the rise of cloud services, creating VPN solutions leveraging the cloud is easier than ever. Today, I am excited to introduce a powerful tool that simplifies the process of setting up a WireGuard VPN on an AWS EC2 instance – my open source <a href="https://registry.terraform.io/modules/RyanDerr/ec2-wireguard-vpn/aws/latest?tab=inputs">EC2 WireGuard VPN Terraform Module</a>.</p>
+<h3 id="why-wireguard">Why WireGuard?</h3>
+<p>WireGuard has gained significant traction in recent years for its simplicity, performance, and security. As a modern and lightweight VPN protocol, WireGuard offers fast and secure communication, making it an ideal choice for various use cases.</p>
+<h3 id="why-terraform-with-aws-for-hosting-wireguard">Why Terraform With AWS For Hosting WireGuard?</h3>
+<p>Selecting the right hosting platform is a critical decision when deploying a WireGuard VPN, and <a href="https://aws.amazon.com/ec2/">AWS EC2</a> stands out as an excellent choice for a myriad of reasons. Let&rsquo;s explore why opting for AWS EC2 enhances the overall performance, reliability, and flexibility of your WireGuard VPN deployment. With AWS leveraging Terraform, deploying your VPN becomes templatizable and deployable within a matter of seconds. Terraform allows you to define your infrastructure as code, enabling you to version control and automate the deployment process. By using the EC2 WireGuard VPN Terraform Module on AWS, you can easily spin up and manage your VPN instances, making the deployment process streamlined and efficient.</p>
+<ol>
+<li>
+<p><strong>Global Reach and Low Latency</strong>:</p>
+<p>AWS&rsquo;s extensive global network of data centers ensures that you can deploy your WireGuard VPN instances close to your users, minimizing latency and optimizing connection speeds. This global reach is particularly advantageous for organizations with a distributed user base or those catering to international clients.</p>
+</li>
+<li>
+<p><strong>Scalability and Flexibility</strong>:</p>
+<p>AWS EC2 provides unmatched scalability, allowing you to easily adjust the size and count of your instances based on demand. Whether you&rsquo;re a startup experiencing rapid growth or an established enterprise with fluctuating VPN usage, AWS EC2 ensures that your WireGuard VPN scales seamlessly to meet your evolving needs.</p>
+</li>
+<li>
+<p><strong>Cost-Effective Infrastructure</strong>:</p>
+<p>AWS EC2&rsquo;s pay-as-you-go pricing model enables cost optimization by charging only for the resources you consume. This flexibility is advantageous, especially for businesses aiming to control costs and allocate resources efficiently. Additionally, various EC2 instance types cater to diverse performance requirements, allowing you to choose the most cost-effective option for your VPN deployment.</p>
+</li>
+<li>
+<p><strong>Reliability and Redundancy</strong>:</p>
+<p>AWS&rsquo;s commitment to providing a highly reliable infrastructure means that your WireGuard VPN benefits from robust data center facilities, redundant power systems, and network redundancy. With multiple availability zones and regions, AWS EC2 enhances the resilience of your VPN, ensuring high availability even in the face of unexpected disruptions.</p>
+</li>
+<li>
+<p><strong>Ease of Management with Terraform</strong>:</p>
+<p>The synergy between AWS EC2 and Terraform simplifies infrastructure management and deployment. Leveraging the EC2 WireGuard VPN Terraform Module on AWS ensures a streamlined and efficient process, allowing you to focus on configuring the VPN&rsquo;s specific parameters without getting bogged down by infrastructure intricacies.</p>
+</li>
+</ol>
+<h3 id="getting-started">Getting Started</h3>
+<p>Getting started with the EC2 WireGuard VPN Terraform Module is a breeze. Simply follow these steps:</p>
+<ol>
+<li>
+<p><strong>Module Installation</strong>:</p>
+<p>Use Terraform&rsquo;s module registry <a href="https://registry.terraform.io/modules/RyanDerr/ec2-wireguard-vpn/aws/latest">ec2-wireguard-vpn</a> to install the module within the offical:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-hcl" data-lang="hcl"><span style="color:#66d9ef">module</span> <span style="color:#e6db74">&#34;ec2_wireguard_vpn&#34;</span> {
+    source <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;RyanDerr/ec2-wireguard-vpn/aws&#34;</span>
+    version <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;X.Y.Z&#34;</span>
+    ...
+}
+</code></pre></div></li>
+<li>
+<p><strong>Configuration</strong>:</p>
+<p>Customize the module by providing the necessary variables in your Terraform configuration. Refer to the <a href="https://registry.terraform.io/modules/RyanDerr/ec2-wireguard-vpn/aws/latest?tab=inputs">documentation</a> for a comprehensive list of available options.</p>
+</li>
+<li>
+<p>Terraform Init &amp; Apply:</p>
+<p>Run <code>terraform init</code> to download the necessary dependencies and <code>terraform apply</code> to provision your WireGuard VPN on AWS. The module will handle the intricate details, and you&rsquo;ll have a secure VPN up and running in no time.</p>
+</li>
+<li>
+<p>Connect to Wireguard VPN</p>
+<ul>
+<li>
+<p>Install the <a href="https://www.wireguard.com/install/">WireGuard GUI</a> application on your local machine. You can find the appropriate version for your operating system on the official WireGuard website.</p>
+</li>
+<li>
+<p>Open the WireGuard GUI application and click on the &ldquo;+&rdquo; button to add a new tunnel.</p>
+</li>
+<li>
+<p>Select &ldquo;Import tunnel(s) from file&rdquo; and choose the WireGuard configuration file downloaded to the device running Terraform from the completion of step 3.</p>
+</li>
+<li>
+<p>Once the tunnel is imported, click on the toggle switch to activate the connection.</p>
+</li>
+<li>
+<p>You should now be connected to your EC2 instance via the WireGuard VPN. You can verify the connection status in the WireGuard GUI application.</p>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="conclusion">Conclusion</h3>
+<p>With the EC2 WireGuard VPN Terraform Module, we aim to simplify the process of deploying a secure and scalable VPN solution on AWS. By leveraging the power of Terraform and AWS EC2, you can easily set up and manage your WireGuard VPN instances, taking advantage of AWS&rsquo;s global reach, scalability, cost-effectiveness, reliability, and ease of management. Whether you&rsquo;re a small startup or a large enterprise, this module provides a streamlined and efficient way to establish secure VPN connections. Start using the EC2 WireGuard VPN Terraform Module today and experience the benefits of a simplified VPN deployment on AWS.</p>
+</div></article>
+</div>
+    </div>
+</body>
+
+</html>
