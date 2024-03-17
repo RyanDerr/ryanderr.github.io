@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Github on Ryan Derr&#39;s Blog</title>
-    <link>http://ryanderr.github.io/tags/github/</link>
+    <link>http://www.ryanderr.dev/tags/github/</link>
     <description>Recent content in Github on Ryan Derr&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 16 Jul 2023 12:36:58 -0500</lastBuildDate><atom:link href="http://ryanderr.github.io/tags/github/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 16 Jul 2023 12:36:58 -0500</lastBuildDate><atom:link href="http://www.ryanderr.dev/tags/github/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>GitHub Pages vs. Vercel: Choosing the Right Platform for Your Website</title>
-      <link>http://ryanderr.github.io/posts/gh-vs-vercel/</link>
+      <link>http://www.ryanderr.dev/posts/gh-vs-vercel/</link>
       <pubDate>Sun, 16 Jul 2023 12:36:58 -0500</pubDate>
       
-      <guid>http://ryanderr.github.io/posts/gh-vs-vercel/</guid>
+      <guid>http://www.ryanderr.dev/posts/gh-vs-vercel/</guid>
       <description>Introduction In the world of web development, choosing the right platform to host your website is crucial. Two popular options are GitHub Pages and Vercel. Both platforms offer powerful features, but they have distinct differences that can impact your decision. In this blog post, we will explore when to use GitHub Pages and Vercel, along with their benefits and drawbacks, helping you make an informed choice for your web hosting needs.</description>
     </item>
     

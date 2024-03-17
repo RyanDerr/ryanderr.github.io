@@ -1,19 +1,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
 		<title>Posts on Ryan Derr&#39;s Blog</title>
-		<link>http://ryanderr.github.io/posts/</link>
+		<link>http://www.ryanderr.dev/posts/</link>
 		<description>Recent content in Posts on Ryan Derr&#39;s Blog</description>
 		<generator>Hugo -- gohugo.io</generator>
 		<language>en-us</language>
 		<lastBuildDate>Sat, 30 Dec 2023 12:30:35 -0500</lastBuildDate>
-		<atom:link href="http://ryanderr.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+		<atom:link href="http://www.ryanderr.dev/posts/index.xml" rel="self" type="application/rss+xml" />
 		
 		<item>
 			<title>AWS Wireguard Vpn Via Terraform</title>
-			<link>http://ryanderr.github.io/posts/aws-wireguard-vpn-terraform/</link>
+			<link>http://www.ryanderr.dev/posts/aws-wireguard-vpn-terraform/</link>
 			<pubDate>Sat, 30 Dec 2023 12:30:35 -0500</pubDate>
 			
-			<guid>http://ryanderr.github.io/posts/aws-wireguard-vpn-terraform/</guid>
+			<guid>http://www.ryanderr.dev/posts/aws-wireguard-vpn-terraform/</guid>
 			<description><![CDATA[%!s(<nil>)]]></description>
 			<content type="html"><![CDATA[<h2 id="introducing-the-ec2-wireguard-vpn-terraform-module">Introducing the EC2 WireGuard VPN Terraform Module</h2>
 <p>In the ever-evolving landscape of the digital age, ensuring secure and efficient communication is paramount. Virtual Private Networks (VPNs) play a crucial role in establishing secure connections, and with the rise of cloud services, creating VPN solutions leveraging the cloud is easier than ever. Today, I am excited to introduce a powerful tool that simplifies the process of setting up a WireGuard VPN on an AWS EC2 instance – my open source <a href="https://registry.terraform.io/modules/RyanDerr/ec2-wireguard-vpn/aws/latest?tab=inputs">EC2 WireGuard VPN Terraform Module</a>.</p>
@@ -91,10 +91,10 @@
 		
 		<item>
 			<title>AWS ECS Faster &amp; Prolonged Shutdown Efficiency</title>
-			<link>http://ryanderr.github.io/posts/aws-ec2-shutdown-efficiency/</link>
+			<link>http://www.ryanderr.dev/posts/aws-ec2-shutdown-efficiency/</link>
 			<pubDate>Sun, 30 Jul 2023 12:38:29 -0500</pubDate>
 			
-			<guid>http://ryanderr.github.io/posts/aws-ec2-shutdown-efficiency/</guid>
+			<guid>http://www.ryanderr.dev/posts/aws-ec2-shutdown-efficiency/</guid>
 			<description><![CDATA[%!s(<nil>)]]></description>
 			<content type="html"><![CDATA[<h3 id="introduction">Introduction</h3>
 <p>Containerization has revolutionized the way applications are deployed and managed, providing enhanced scalability and agility. Amazon Elastic Container Service (<a href="https://aws.amazon.com/ecs/">ECS</a>), a highly scalable and fully managed container orchestration service, is at the forefront of this container revolution. In <a href="https://aws.amazon.com/about-aws/whats-new/2023/06/amazon-ecs-tasks-faster-prolonged-shutdown/">June 2023</a>, AWS announced a significant improvement to Amazon ECS, introducing faster and prolonged shutdown capabilities for tasks. This update aims to optimize resource utilization and enhance the overall efficiency of container management.</p>
@@ -123,10 +123,10 @@
 		
 		<item>
 			<title>GitHub Pages vs. Vercel: Choosing the Right Platform for Your Website</title>
-			<link>http://ryanderr.github.io/posts/gh-vs-vercel/</link>
+			<link>http://www.ryanderr.dev/posts/gh-vs-vercel/</link>
 			<pubDate>Sun, 16 Jul 2023 12:36:58 -0500</pubDate>
 			
-			<guid>http://ryanderr.github.io/posts/gh-vs-vercel/</guid>
+			<guid>http://www.ryanderr.dev/posts/gh-vs-vercel/</guid>
 			<description><![CDATA[%!s(<nil>)]]></description>
 			<content type="html"><![CDATA[<h3 id="introduction">Introduction</h3>
 <p>In the world of web development, choosing the right platform to host your website is crucial. Two popular options are GitHub Pages and Vercel. Both platforms offer powerful features, but they have distinct differences that can impact your decision. In this blog post, we will explore when to use GitHub Pages and Vercel, along with their benefits and drawbacks, helping you make an informed choice for your web hosting needs.</p>
@@ -175,10 +175,10 @@
 		
 		<item>
 			<title>A Case For PoshGit</title>
-			<link>http://ryanderr.github.io/posts/posh-git/</link>
+			<link>http://www.ryanderr.dev/posts/posh-git/</link>
 			<pubDate>Thu, 16 Mar 2023 12:42:42 -0500</pubDate>
 			
-			<guid>http://ryanderr.github.io/posts/posh-git/</guid>
+			<guid>http://www.ryanderr.dev/posts/posh-git/</guid>
 			<description><![CDATA[%!s(<nil>)]]></description>
 			<content type="html"><![CDATA[<p>As developers, our daily workflow often revolves around Git and I&rsquo;m no different. It&rsquo;s the go-to version control system for managing code changes, collaborating with teammates, and ensuring project integrity. While I always lean toward using systems that run Bash (shoutout to Unix), that&rsquo;s not always an option and using Git from the command line can be tedious and time-consuming. Enter <strong>PoshGit</strong> - a PowerShell module designed to enhance your Git experience and streamline your workflow.</p>
 <h2 id="what-is-poshgithttpsgithubcomdahlbykposh-git">What is <a href="https://github.com/dahlbyk/posh-git">PoshGit</a>?</h2>

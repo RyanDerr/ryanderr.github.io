@@ -2,26 +2,26 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>AWS on Ryan Derr&#39;s Blog</title>
-    <link>http://ryanderr.github.io/tags/aws/</link>
+    <link>http://www.ryanderr.dev/tags/aws/</link>
     <description>Recent content in AWS on Ryan Derr&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 30 Dec 2023 12:30:35 -0500</lastBuildDate><atom:link href="http://ryanderr.github.io/tags/aws/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 30 Dec 2023 12:30:35 -0500</lastBuildDate><atom:link href="http://www.ryanderr.dev/tags/aws/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>AWS Wireguard Vpn Via Terraform</title>
-      <link>http://ryanderr.github.io/posts/aws-wireguard-vpn-terraform/</link>
+      <link>http://www.ryanderr.dev/posts/aws-wireguard-vpn-terraform/</link>
       <pubDate>Sat, 30 Dec 2023 12:30:35 -0500</pubDate>
       
-      <guid>http://ryanderr.github.io/posts/aws-wireguard-vpn-terraform/</guid>
+      <guid>http://www.ryanderr.dev/posts/aws-wireguard-vpn-terraform/</guid>
       <description>Introducing the EC2 WireGuard VPN Terraform Module In the ever-evolving landscape of the digital age, ensuring secure and efficient communication is paramount. Virtual Private Networks (VPNs) play a crucial role in establishing secure connections, and with the rise of cloud services, creating VPN solutions leveraging the cloud is easier than ever. Today, I am excited to introduce a powerful tool that simplifies the process of setting up a WireGuard VPN on an AWS EC2 instance – my open source EC2 WireGuard VPN Terraform Module.</description>
     </item>
     
     <item>
       <title>AWS ECS Faster &amp; Prolonged Shutdown Efficiency</title>
-      <link>http://ryanderr.github.io/posts/aws-ec2-shutdown-efficiency/</link>
+      <link>http://www.ryanderr.dev/posts/aws-ec2-shutdown-efficiency/</link>
       <pubDate>Sun, 30 Jul 2023 12:38:29 -0500</pubDate>
       
-      <guid>http://ryanderr.github.io/posts/aws-ec2-shutdown-efficiency/</guid>
+      <guid>http://www.ryanderr.dev/posts/aws-ec2-shutdown-efficiency/</guid>
       <description>Introduction Containerization has revolutionized the way applications are deployed and managed, providing enhanced scalability and agility. Amazon Elastic Container Service (ECS), a highly scalable and fully managed container orchestration service, is at the forefront of this container revolution. In June 2023, AWS announced a significant improvement to Amazon ECS, introducing faster and prolonged shutdown capabilities for tasks. This update aims to optimize resource utilization and enhance the overall efficiency of container management.</description>
     </item>
     
