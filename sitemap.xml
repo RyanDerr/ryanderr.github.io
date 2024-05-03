@@ -2,20 +2,35 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>http://www.ryanderr.dev/tags/aws/</loc>
+    <lastmod>2024-05-03T01:53:29-05:00</lastmod>
+  </url><url>
+    <loc>http://www.ryanderr.dev/tags/github/</loc>
+    <lastmod>2024-05-03T01:53:29-05:00</lastmod>
+  </url><url>
+    <loc>http://www.ryanderr.dev/tags/iam/</loc>
+    <lastmod>2024-05-03T01:53:29-05:00</lastmod>
+  </url><url>
+    <loc>http://www.ryanderr.dev/posts/aws-terraform-github-auth/</loc>
+    <lastmod>2024-05-03T01:53:29-05:00</lastmod>
+  </url><url>
+    <loc>http://www.ryanderr.dev/posts/</loc>
+    <lastmod>2024-05-03T01:53:29-05:00</lastmod>
+  </url><url>
+    <loc>http://www.ryanderr.dev/</loc>
+    <lastmod>2024-05-03T01:53:29-05:00</lastmod>
+  </url><url>
+    <loc>http://www.ryanderr.dev/tags/</loc>
+    <lastmod>2024-05-03T01:53:29-05:00</lastmod>
+  </url><url>
+    <loc>http://www.ryanderr.dev/tags/terraform/</loc>
+    <lastmod>2024-05-03T01:53:29-05:00</lastmod>
+  </url><url>
     <loc>http://www.ryanderr.dev/tags/about/</loc>
     <lastmod>2024-03-17T14:41:01-05:00</lastmod>
   </url><url>
     <loc>http://www.ryanderr.dev/about/</loc>
     <lastmod>2024-03-17T14:41:01-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/</loc>
-    <lastmod>2024-03-17T14:41:01-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/</loc>
-    <lastmod>2024-03-17T14:41:01-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/aws/</loc>
-    <lastmod>2023-12-30T12:30:35-05:00</lastmod>
   </url><url>
     <loc>http://www.ryanderr.dev/posts/aws-wireguard-vpn-terraform/</loc>
     <lastmod>2023-12-30T12:30:35-05:00</lastmod>
@@ -26,12 +41,6 @@
     <loc>http://www.ryanderr.dev/tags/ec2/</loc>
     <lastmod>2023-12-30T12:30:35-05:00</lastmod>
   </url><url>
-    <loc>http://www.ryanderr.dev/posts/</loc>
-    <lastmod>2023-12-30T12:30:35-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/terraform/</loc>
-    <lastmod>2023-12-30T12:30:35-05:00</lastmod>
-  </url><url>
     <loc>http://www.ryanderr.dev/tags/vpn/</loc>
     <lastmod>2023-12-30T12:30:35-05:00</lastmod>
   </url><url>
@@ -40,9 +49,6 @@
   </url><url>
     <loc>http://www.ryanderr.dev/tags/ecs/</loc>
     <lastmod>2023-07-30T12:38:29-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/github/</loc>
-    <lastmod>2023-07-16T12:36:58-05:00</lastmod>
   </url><url>
     <loc>http://www.ryanderr.dev/posts/gh-vs-vercel/</loc>
     <lastmod>2023-07-16T12:36:58-05:00</lastmod>

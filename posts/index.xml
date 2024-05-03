@@ -5,8 +5,143 @@
 		<description>Recent content in Posts on Ryan Derr&#39;s Blog</description>
 		<generator>Hugo -- gohugo.io</generator>
 		<language>en-us</language>
-		<lastBuildDate>Sat, 30 Dec 2023 12:30:35 -0500</lastBuildDate>
+		<lastBuildDate>Fri, 03 May 2024 01:53:29 -0500</lastBuildDate>
 		<atom:link href="http://www.ryanderr.dev/posts/index.xml" rel="self" type="application/rss+xml" />
+		
+		<item>
+			<title>Leveraging AWS Roles for Enhanced Security in GitHub Workflows</title>
+			<link>http://www.ryanderr.dev/posts/aws-terraform-github-auth/</link>
+			<pubDate>Fri, 03 May 2024 01:53:29 -0500</pubDate>
+			
+			<guid>http://www.ryanderr.dev/posts/aws-terraform-github-auth/</guid>
+			<description><![CDATA[%!s(<nil>)]]></description>
+			<content type="html"><![CDATA[<h1 id="moving-away-from-aws-access-keys">Moving Away From AWS Access Keys</h1>
+<p>For a considerable period, I, like many others, relied on Terraform to provision my resources within AWS. Terraform, right out of the box, offers multiple authentication methods to access, provision, modify, or destroy resources, not to mention its support for remote state.</p>
+<p>In the beginning, I opted for the straightforward approach, using <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> for a pipeline user to handle the authentication. However, I soon encountered a significant challenge. I wanted to retain exclusive approval rights for changes to AWS via a GitHub environment, while my collaborators needed access to the AWS state to perform plans and ensure the proposed changes would function as expected.</p>
+<p>One solution could have been to create another AWS account with access only to the states. However, this would lead to an increase in the number of users and, consequently, more credentials at risk of exposure and compromise.</p>
+<p>To avoid this logistical conundrum, I discovered a more secure and efficient way to authorize and perform actions against AWS within my repository - <strong>AWS roles</strong> for my agents!</p>
+<p>In the following sections, we will delve into how to use AWS roles within GitHub workflows as an alternative to using access and secret keys. This method not only enhances security but also aligns with the best practices for AWS access management.</p>
+<h2 id="the-power-of-aws-roles-what-they-are-and-why-they-matter">The Power of AWS Roles: What They Are and Why They Matter</h2>
+<p>AWS roles are a potent tool in your AWS arsenal. They offer a secure method to delegate permissions to trusted entities, eliminating the need for long-term credentials. Instead of relying on permanent access keys, AWS roles utilize temporary security credentials. This approach significantly minimizes the risk of credential exposure, thereby bolstering the security of your AWS operations.</p>
+<p>But the power of AWS roles doesn&rsquo;t stop there. They offer a level of flexibility and control that goes beyond users. You can assign roles to specific repositories, branches, and even workflows, providing a granular level of access control.</p>
+<p>Moreover, you can define a policy that precisely outlines the scope of what the role can do within AWS. This way, you can ensure that the role grants permissions only for the necessary resources and actions, further enhancing the security of your AWS operations. This approach aligns with the principle of least privilege, a widely recognized best practice in access management.</p>
+<h2 id="integrating-aws-roles-with-github-workflows">Integrating AWS Roles with GitHub Workflows</h2>
+<p>To integrate AWS roles with GitHub workflows:</p>
+<ol>
+<li>Install the <code>configure-aws-credentials</code> action from the GitHub marketplace.</li>
+<li>In your workflow file, use the <code>configure-aws-credentials</code> action to set up AWS credentials.</li>
+<li>Use the <code>role-to-assume</code> parameter to specify the ARN of the role to assume.</li>
+</ol>
+<h2 id="create-aws-policy">Create AWS Policy</h2>
+<p>The IAM policy grants Terraform the necessary permissions to manage a specific DynamoDB table and S3 bucket in AWS that we will later assign to a role. These resources are used by Terraform for state management, with the DynamoDB table for state locking and the S3 bucket for storing state files.</p>
+<p>Follow the steps below to create a new policy in AWS IAM and attach it to an IAM role. Make sure to replace <code>&lt;region&gt;</code>, <code>&lt;account-id&gt;</code>, <code>&lt;dynamodb-table-name&gt;</code>, and <code>&lt;bucket-name&gt;</code> with your specific values.</p>
+<ol>
+<li>
+<p>Create a new policy in AWS IAM</p>
+<ul>
+<li>Navigate to the AWS Management Console and open the IAM service.</li>
+<li>In the left navigation pane, choose &ldquo;Policies&rdquo;, then &ldquo;Create policy&rdquo;.</li>
+<li>Choose the &ldquo;JSON&rdquo; tab and paste the following policy:</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+    <span class="nt">&#34;Version&#34;</span><span class="p">:</span> <span class="s2">&#34;2012-10-17&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;Statement&#34;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&#34;Effect&#34;</span><span class="p">:</span> <span class="s2">&#34;Allow&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;Action&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&#34;dynamodb:*&#34;</span><span class="p">,</span>
+                <span class="s2">&#34;s3:*&#34;</span>
+            <span class="p">],</span>
+            <span class="nt">&#34;Resource&#34;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&#34;arn:aws:dynamodb:&lt;region&gt;:&lt;account-id&gt;:table/&lt;dynamodb-table-name&gt;&#34;</span><span class="p">,</span>
+                <span class="s2">&#34;arn:aws:s3:::&lt;bucket-name&gt;&#34;</span><span class="p">,</span>
+                <span class="s2">&#34;arn:aws:s3:::&lt;bucket-name&gt;/*&#34;</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></li>
+<li>
+<p>Attach the newly created policy <code>example-policy</code> to an IAM role</p>
+<ul>
+<li>In the IAM service, choose &ldquo;Roles&rdquo; in the left navigation pane, then &ldquo;Create role&rdquo;.</li>
+<li>Select <code>Custom trust policy</code> option and paste the following policy</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+    <span class="nt">&#34;Version&#34;</span><span class="p">:</span> <span class="s2">&#34;2008-10-17&#34;</span><span class="p">,</span>
+    <span class="nt">&#34;Statement&#34;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">&#34;Effect&#34;</span><span class="p">:</span> <span class="s2">&#34;Allow&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;Principal&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;Federated&#34;</span><span class="p">:</span> <span class="s2">&#34;arn:aws:iam::&lt;account-id&gt;:oidc-provider/token.actions.GitHubusercontent.com&#34;</span>
+            <span class="p">},</span>
+            <span class="nt">&#34;Action&#34;</span><span class="p">:</span> <span class="s2">&#34;sts:AssumeRoleWithWebIdentity&#34;</span><span class="p">,</span>
+            <span class="nt">&#34;Condition&#34;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">&#34;StringLike&#34;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">&#34;token.actions.GitHubusercontent.com:sub&#34;</span><span class="p">:</span> <span class="s2">&#34;repo:&lt;GitHub Account&gt;/&lt;Repo Name&gt;:environment:AWS-Dev&#34;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div><p>This policy specifies that the role is exclusively applicable to your AWS account, and only within your repository in a particular GitHub environment, namely AWS-Dev. For further details on the conditions you can set, please refer to the official <a href="https://docs.GitHub.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services#configuring-the-role-and-trust-policy">GitHub documentation</a>. Ensure you provide the appropriate <code>&lt;GitHub Account&gt;</code> and <code>&lt;Repo Name&gt;</code> corresponding to your GitHub information.</p>
+</li>
+<li>
+<p>Attach the policy from step one to the new trust policy and create with a unique name.</p>
+<ul>
+<li>Make sure you note down the ARN for the newly created role as that&rsquo;s how GitHub will reference the role it attempts to assume.</li>
+</ul>
+</li>
+</ol>
+<h2 id="authorizing-github-workflow-to-utilize-the-assumed-role">Authorizing GitHub Workflow To Utilize The Assumed Role</h2>
+<ol>
+<li>
+<p>Securely store your Amazon Resource Name (ARN). This can be done either within your GitHub repository or as an environment secret.</p>
+<ul>
+<li><strong>GitHub Repository</strong>: If you choose to store it in your repository, make sure it is not in a publicly accessible file or location. It is recommended to use a <code>.env</code> file which is added to your <code>.gitignore</code> file to prevent it from being committed to your repository.</li>
+<li><strong>Environment Secrets</strong>: Alternatively, you can store your ARN as a secret in your GitHub repository settings. Go to your repository settings, then to the &lsquo;Secrets&rsquo; section. Here, you can add a new secret with your ARN as the value. This secret can then be accessed in your GitHub workflows.</li>
+</ul>
+</li>
+<li>
+<p>Update your workflow to setup the assumed role that it will then utilize for access to AWS resources.</p>
+<p>Here&rsquo;s an example:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Terraform Deploy Workflow</span><span class="w">
+</span><span class="w"></span><span class="nt">on</span><span class="p">:</span><span class="w"> 
+</span><span class="w">    </span><span class="nt">push</span><span class="p">:</span><span class="w"> 
+</span><span class="w">        </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="l">main]</span><span class="w">
+</span><span class="w"></span><span class="nt">permissions</span><span class="p">:</span><span class="w"> 
+</span><span class="w">    </span><span class="nt">id-token</span><span class="p">:</span><span class="w"> </span><span class="l">write</span><span class="w">
+</span><span class="w">    </span><span class="nt">contents</span><span class="p">:</span><span class="w"> </span><span class="l">read</span><span class="w">
+</span><span class="w">    </span><span class="nt">pull-requests</span><span class="p">:</span><span class="w"> </span><span class="l">write</span><span class="w">
+</span><span class="w"></span><span class="nt">jobs</span><span class="p">:</span><span class="w">
+</span><span class="w"></span><span class="nt">deploy</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l">ubuntu-latest</span><span class="w">
+</span><span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;AWS-Dev&#39;</span><span class="w">
+</span><span class="w">    </span><span class="nt">steps</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Checkout code</span><span class="w">
+</span><span class="w">    </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">actions/checkout@v2</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Set up AWS credentials</span><span class="w">
+</span><span class="w">    </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">aws-actions/configure-aws-credentials@v4</span><span class="w">
+</span><span class="w">    </span><span class="nt">with</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">aws-region</span><span class="p">:</span><span class="w"> </span><span class="l">us-west-2</span><span class="w">
+</span><span class="w">        </span><span class="nt">role-to-assume</span><span class="p">:</span><span class="w"> </span>{{<span class="w"> </span><span class="l">secrets.ARN_TERRAFORM_BACKEND }}</span><span class="w">
+</span><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">Setup Terraform</span><span class="w">
+</span><span class="w">    </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l">hashicorp/setup-terraform@v3.0.0</span><span class="w">
+</span><span class="w">    </span><span class="nt">with</span><span class="p">:</span><span class="w">
+</span><span class="w">        </span><span class="nt">terraform_version</span><span class="p">:</span><span class="w"> </span><span class="m">1.8.0</span><span class="w">
+</span><span class="w">    </span><span class="l">...</span><span class="w">
+</span></code></pre></div><p>In this example, the workflow assumes the specified AWS role and uses its permissions to read from the terraform backend in S3 and DynamoDB. Note that the ARN again is being pulled directly from a GitHub secret and the value will not be displayed directly in the run.</p>
+<p>For more about <a href="https://github.com/marketplace/actions/configure-aws-credentials-action-for-github-actions">aws-actions/configure-aws-credentials@v4</a> action, you can read the AWS documentation in GitHub.</p>
+</li>
+<li>
+<p>Upon running your workflow, it should now seamlessly fetch and utilize the assigned role for authenticating with AWS!</p>
+</li>
+</ol>
+<h2 id="final-thoughts">Final Thoughts</h2>
+<p>Using AWS roles in GitHub workflows instead of access and secret keys is a more secure and efficient way to manage AWS permissions. It not only reduces the risk of credential exposure but also simplifies the process of updating permissions.</p>
+]]></content>
+		</item>
 		
 		<item>
 			<title>AWS Wireguard Vpn Via Terraform</title>

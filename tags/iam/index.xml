@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>IAM on Ryan Derr&#39;s Blog</title>
+    <link>http://www.ryanderr.dev/tags/iam/</link>
+    <description>Recent content in IAM on Ryan Derr&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 03 May 2024 01:53:29 -0500</lastBuildDate><atom:link href="http://www.ryanderr.dev/tags/iam/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Leveraging AWS Roles for Enhanced Security in GitHub Workflows</title>
+      <link>http://www.ryanderr.dev/posts/aws-terraform-github-auth/</link>
+      <pubDate>Fri, 03 May 2024 01:53:29 -0500</pubDate>
+      
+      <guid>http://www.ryanderr.dev/posts/aws-terraform-github-auth/</guid>
+      <description>Moving Away From AWS Access Keys For a considerable period, I, like many others, relied on Terraform to provision my resources within AWS. Terraform, right out of the box, offers multiple authentication methods to access, provision, modify, or destroy resources, not to mention its support for remote state.
+In the beginning, I opted for the straightforward approach, using AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY for a pipeline user to handle the authentication. However, I soon encountered a significant challenge.</description>
+    </item>
+    
+  </channel>
+</rss>
