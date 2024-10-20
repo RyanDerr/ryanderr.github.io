@@ -3,24 +3,33 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>http://www.ryanderr.dev/tags/aws/</loc>
-    <lastmod>2024-05-03T01:53:29-05:00</lastmod>
+    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
+  </url><url>
+    <loc>http://www.ryanderr.dev/posts/aws-psql-rds-iam-auth/</loc>
+    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
   </url><url>
     <loc>http://www.ryanderr.dev/tags/github/</loc>
-    <lastmod>2024-05-03T01:53:29-05:00</lastmod>
+    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
   </url><url>
     <loc>http://www.ryanderr.dev/tags/iam/</loc>
-    <lastmod>2024-05-03T01:53:29-05:00</lastmod>
+    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
   </url><url>
-    <loc>http://www.ryanderr.dev/posts/aws-terraform-github-auth/</loc>
-    <lastmod>2024-05-03T01:53:29-05:00</lastmod>
+    <loc>http://www.ryanderr.dev/tags/postgresql/</loc>
+    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
   </url><url>
     <loc>http://www.ryanderr.dev/posts/</loc>
-    <lastmod>2024-05-03T01:53:29-05:00</lastmod>
+    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
+  </url><url>
+    <loc>http://www.ryanderr.dev/tags/rds/</loc>
+    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
   </url><url>
     <loc>http://www.ryanderr.dev/</loc>
-    <lastmod>2024-05-03T01:53:29-05:00</lastmod>
+    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
   </url><url>
     <loc>http://www.ryanderr.dev/tags/</loc>
+    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
+  </url><url>
+    <loc>http://www.ryanderr.dev/posts/aws-terraform-github-auth/</loc>
     <lastmod>2024-05-03T01:53:29-05:00</lastmod>
   </url><url>
     <loc>http://www.ryanderr.dev/tags/terraform/</loc>

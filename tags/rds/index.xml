@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>RDS on Ryan Derr&#39;s Blog</title>
+    <link>http://www.ryanderr.dev/tags/rds/</link>
+    <description>Recent content in RDS on Ryan Derr&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 18 Oct 2024 16:21:27 -0500</lastBuildDate><atom:link href="http://www.ryanderr.dev/tags/rds/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>AWS Postgres RDS IAM Authentication</title>
+      <link>http://www.ryanderr.dev/posts/aws-psql-rds-iam-auth/</link>
+      <pubDate>Fri, 18 Oct 2024 16:21:27 -0500</pubDate>
+      
+      <guid>http://www.ryanderr.dev/posts/aws-psql-rds-iam-auth/</guid>
+      <description>Securely Accessing AWS PostgreSQL RDS Instances With IAM Relational database services have long been a cornerstone for storing and retrieving application data, dating back to the 1970s. However, managing credentials for applications, users, and administrators has always been a challenge due to the static nature of traditional credentials. With AWS RDS, we can address this issue by offering built-in IAM authentication for RDS PostgreSQL, enabling secure, short-lived access scoped to specific users or groups.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -5,8 +5,127 @@
 		<description>Recent content in Posts on Ryan Derr&#39;s Blog</description>
 		<generator>Hugo -- gohugo.io</generator>
 		<language>en-us</language>
-		<lastBuildDate>Fri, 03 May 2024 01:53:29 -0500</lastBuildDate>
+		<lastBuildDate>Fri, 18 Oct 2024 16:21:27 -0500</lastBuildDate>
 		<atom:link href="http://www.ryanderr.dev/posts/index.xml" rel="self" type="application/rss+xml" />
+		
+		<item>
+			<title>AWS Postgres RDS IAM Authentication</title>
+			<link>http://www.ryanderr.dev/posts/aws-psql-rds-iam-auth/</link>
+			<pubDate>Fri, 18 Oct 2024 16:21:27 -0500</pubDate>
+			
+			<guid>http://www.ryanderr.dev/posts/aws-psql-rds-iam-auth/</guid>
+			<description><![CDATA[%!s(<nil>)]]></description>
+			<content type="html"><![CDATA[<h1 id="securely-accessing-aws-postgresql-rds-instances-with-iam">Securely Accessing AWS PostgreSQL RDS Instances With IAM</h1>
+<p>Relational database services have long been a cornerstone for storing and retrieving application data, dating back to the 1970s. However, managing credentials for applications, users, and administrators has always been a challenge due to the static nature of traditional credentials. With AWS RDS, we can address this issue by offering built-in IAM authentication for RDS PostgreSQL, enabling secure, short-lived access scoped to specific users or groups. Additionally, this approach enhances auditing capabilities by allowing detailed tracking of who accessed the database and when.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before setting up secure PostgreSQL authentication, ensure you have the following:</p>
+<ul>
+<li>An AWS account with administrative access.</li>
+<li>AWS CLI with account configuration connected.</li>
+<li>An RDS PostgreSQL instance.</li>
+<li>PSQL installed.</li>
+<li>Terraform installed on your local machine with AWS provider configured.</li>
+</ul>
+<h2 id="step-1-set-up-iam-roles-and-policies">Step 1: Set Up IAM Roles and Policies</h2>
+<p>In this step, we&rsquo;ll create an IAM policy and attach it to a group that will be used to authenticate to the RDS instance.</p>
+<h3 id="terraform-configuration">Terraform Configuration</h3>
+<p>First, define the necessary variables (we&rsquo;ll assume you have a way of securely inserting your account ID, but for now, we&rsquo;ll use a variable) that will be used within the following steps:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-hcl" data-lang="hcl"><span class="k">variable</span> <span class="s2">&#34;account_id&#34;</span> {
+<span class="n">  description</span> <span class="o">=</span> <span class="s2">&#34;The AWS account ID&#34;</span>
+<span class="n">  type</span>        <span class="o">=</span> <span class="k">string</span>
+}
+
+<span class="k">variable</span> <span class="s2">&#34;usergroup_name&#34;</span> {
+<span class="n">  description</span> <span class="o">=</span> <span class="s2">&#34;The name of the IAM group for database users&#34;</span>
+<span class="n">  type</span>        <span class="o">=</span> <span class="k">string</span>
+<span class="n">  default</span>     <span class="o">=</span> <span class="s2">&#34;DatabaseUsers&#34;</span>
+}
+
+<span class="k">variable</span> <span class="s2">&#34;db_iam_user&#34;</span> {
+<span class="n">  type</span>        <span class="o">=</span> <span class="k">string</span>
+<span class="n">  description</span> <span class="o">=</span> <span class="s2">&#34;The name of the IAM user for the database&#34;</span>
+<span class="n">  default</span>     <span class="o">=</span> <span class="s2">&#34;db_users&#34;</span>
+}
+
+<span class="k">variable</span> <span class="s2">&#34;region&#34;</span> {
+<span class="n">  description</span> <span class="o">=</span> <span class="s2">&#34;The AWS region where the RDS instance is located&#34;</span>
+<span class="n">  type</span>        <span class="o">=</span> <span class="k">string</span>
+<span class="n">  default</span>     <span class="o">=</span> <span class="s2">&#34;us-west-2&#34;</span>
+}
+
+<span class="k">variable</span> <span class="s2">&#34;db_instance_id&#34;</span> {
+<span class="n">  description</span> <span class="o">=</span> <span class="s2">&#34;The resource ID of the RDS instance&#34;</span>
+<span class="n">  type</span>        <span class="o">=</span> <span class="k">string</span>
+}
+</code></pre></div><p><em><strong>Note</strong></em>: We defaulted the database user to <code>db_users</code> if none is provided, and for future access examples will utilize that IAM name. In practice, you can provide any name you&rsquo;d like and change the subsequent commands for accessing the RDS instance.</p>
+<h3 id="create-the-iam-policy">Create The IAM Policy</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-hcl" data-lang="hcl"><span class="k">resource</span> <span class="s2">&#34;aws_iam_policy&#34; &#34;db_policy&#34;</span> {
+<span class="n">  name</span>        <span class="o">=</span> <span class="s2">&#34;DatabaseAccessPolicy&#34;</span>
+<span class="n">  description</span> <span class="o">=</span> <span class="s2">&#34;Policy for IAM user to connect to RDS instance&#34;</span>
+
+<span class="n">  policy</span> <span class="o">=</span> <span class="k">jsonencode</span><span class="p">(</span>{
+<span class="n">    Version</span> <span class="o">=</span> <span class="s2">&#34;2012-10-17&#34;</span><span class="p">,</span>
+<span class="n">    Statement</span> <span class="o">=</span> <span class="p">[</span>
+      {
+<span class="n">        Effect</span> <span class="o">=</span> <span class="s2">&#34;Allow&#34;</span><span class="p">,</span>
+<span class="n">        Action</span> <span class="o">=</span> <span class="p">[</span>
+          <span class="s2">&#34;rds-db:connect&#34;</span>
+        <span class="p">],</span>
+<span class="n">        Resource</span> <span class="o">=</span> <span class="p">[</span>
+          <span class="s2">&#34;arn:aws:rds-db:${var.region}:${var.account_id}:dbuser:${var.db_instance_id}/${var.db_iam_user}&#34;</span>
+        <span class="p">]</span>
+      }
+    <span class="p">]</span>
+  }<span class="p">)</span>
+
+<span class="n">  tags</span> <span class="o">=</span> {
+<span class="n">    Environment</span> <span class="o">=</span> <span class="s2">&#34;production&#34;</span>
+  }
+}
+</code></pre></div><p>The <code>aws_iam_policy</code> resource above creates a new IAM policy named DatabaseAccessPolicy. This policy allows the <code>rds-db:connect</code> action on a specific RDS database user. The Resource field specifies the ARN of the RDS database user, which is constructed using the provided variables and is tagged with an environment label <code>production</code>.</p>
+<p>For more information on Terraform&rsquo;s creation of the policy, refer to the official <a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy">aws_iam_policy</a> documentation.</p>
+<h3 id="attach-policy-to-group">Attach Policy To Group</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-hcl" data-lang="hcl"><span class="k">resource</span> <span class="s2">&#34;aws_iam_group_policy_attachment&#34; &#34;db_policy_attachment&#34;</span> {
+<span class="n">  group</span>      <span class="o">=</span> <span class="k">var</span><span class="p">.</span><span class="k">usergroup_name</span>
+<span class="n">  policy_arn</span> <span class="o">=</span> <span class="k">aws_iam_policy</span><span class="p">.</span><span class="k">db_policy</span><span class="p">.</span><span class="k">arn</span>
+}
+</code></pre></div><p>The <code>aws_iam_group_policy_attachment</code> resource we&rsquo;ve just created attaches the previously created DatabaseAccessPolicy to an existing IAM group specified by the <code>usergroup_name</code> variable. This allows all users in the specified IAM group to use the permissions defined in the DatabaseAccessPolicy. For this guide, we&rsquo;ll presume that this AWS group already exists and the users desiring to access the DB are already members.</p>
+<p>For more information on Terraform&rsquo;s policy group attachment, refer to <a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_group_policy_attachment">aws_iam_group_policy_attachment</a> documentation.</p>
+<h2 id="step-2-enable-iam-authentication-on-your-rds-instances">Step 2: Enable IAM Authentication On Your RDS Instances</h2>
+<p>Now that we&rsquo;ve configured a user with the permissions within AWS to access the database, we need to configure RDS PostgreSQL to recognize and accept the AWS IAM authentication method. There are a few ways to achieve this.</p>
+<h3 id="terraform-configuration-1">Terraform Configuration</h3>
+<p>If you are already using Terraform for your project, or just because we used it in a previous step, we can enable it with the flag <code>iam_database_authentication_enabled</code> on a <a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance">aws_db_instance</a>. This boolean flag enables a mapping of AWS IAM accounts to database accounts.</p>
+<h3 id="aws-cli">AWS CLI</h3>
+<p>If you prefer to do this with a CLI tool, AWS has you covered with the handy <a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance">modify-db-instance</a> command.</p>
+<p>An example of enabling IAM authentication with this command is as follows:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">aws rds modify-db-instance <span class="se">\
+</span><span class="se"></span>    --db-instance-identifier &lt;insert-db-identifier&gt; <span class="se">\
+</span><span class="se"></span>    --enable-iam-database-authentication <span class="se">\
+</span><span class="se"></span>    --apply-immediately
+</code></pre></div><h2 id="step-3-create-the-database-user">Step 3: Create the Database User</h2>
+<p>After enabling IAM authentication on your RDS instance, you need to create a PostgreSQL user that matches the IAM user. This user will be used to authenticate against the database using the IAM-generated token.</p>
+<p>You can utilize <a href="https://www.postgresql.org/docs/current/app-psql.html">psql</a> or a database migration tool such as <a href="https://docs.liquibase.com/concepts/introduction-to-liquibase.html">Liquibase</a> for Java or <a href="https://pkg.go.dev/github.com/golang-migrate/migrate/v4">golang-migrate</a> for GO.</p>
+<p>In either case, you can utilize the following SQL to create and map IAM to a newly created PostgreSQL user.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-SQL" data-lang="SQL"><span class="k">CREATE</span><span class="w"> </span><span class="k">USER</span><span class="w"> </span><span class="n">db_users</span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">LOGIN</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="k">GRANT</span><span class="w"> </span><span class="n">rds_iam</span><span class="w"> </span><span class="k">TO</span><span class="w"> </span><span class="n">db_users</span><span class="p">;</span><span class="w">
+</span></code></pre></div><h2 id="step-4-connecting-to-your-rds-database">Step 4: Connecting To Your RDS Database</h2>
+<p>Lastly, we need to grab our token and log in to our database.</p>
+<p>To generate a token in AWS RDS, we can utilize the AWS CLI command <a href="https://docs.aws.amazon.com/cli/latest/reference/rds/generate-db-auth-token.html">generate-db-auth-token</a>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">aws rds generate-db-auth-token <span class="se">\
+</span><span class="se"></span>    --hostname <span class="o">{</span>db-endpoint<span class="o">}</span> <span class="se">\
+</span><span class="se"></span>    --port <span class="o">{</span>db-port<span class="o">}</span> <span class="se">\
+</span><span class="se"></span>    --region <span class="o">{</span>aws-region<span class="o">}</span> <span class="se">\
+</span><span class="se"></span>    --username db_users <span class="c1"># This is taken from the user created for IAM access in the previous steps</span>
+</code></pre></div><p>Once the command is issued, it will return a short-lived authentication token tied directly to our IAM group.</p>
+<p>Example token:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">mydb.123456789012.us-east-1.rds.amazonaws.com:3306/?Action<span class="o">=</span>connect<span class="p">&amp;</span><span class="nv">DBUser</span><span class="o">=</span>db_user<span class="p">&amp;</span>X-Amz-Algorithm<span class="o">=</span>AWS4-HMAC-SHA256<span class="p">&amp;</span>X-Amz-Credential<span class="o">=</span>AKIAIEXAMPLE%2Fus-east-1%2Frds-db%2Faws4_request<span class="p">&amp;</span>X-Amz-Date<span class="o">=</span>20210123T011543Z<span class="p">&amp;</span>X-Amz-Expires<span class="o">=</span>900<span class="p">&amp;</span>X-Amz-SignedHeaders<span class="o">=</span>host<span class="p">&amp;</span>X-Amz-Signature<span class="o">=</span>88987EXAMPLE1EXAMPLE2EXAMPLE3EXAMPLE4EXAMPLE5EXAMPLE6
+</code></pre></div><p>With this returned token, we can now connect to our database in AWS with <code>psql</code> using the following command:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">psql <span class="s2">&#34;host=&lt;rds-endpoint&gt; port=5432 dbname=&lt;db-name&gt; user=db_user password=&lt;iam-token&gt; sslrootcert=&lt;certificateFile&gt; sslmode=verify-full&#34;</span>
+</code></pre></div><p><em><strong>Note</strong></em>: In order to connect, you may need to utilize a <a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html#UsingWithRDS.SSL.CertificatesAllRegions">certificate</a> file provided by AWS to access RDS databases.</p>
+<h2 id="final-thoughts">Final Thoughts</h2>
+<p>By following this guide, you have successfully set up IAM authentication for your AWS RDS PostgreSQL database. This approach enhances the security of your database by leveraging AWS IAM roles and policies, reducing the need for static database credentials. You have learned how to create an IAM user, configure RDS for IAM authentication, generate an authentication token using the AWS CLI, and connect to your database using <code>psql</code>. This method not only simplifies credential management but also aligns with best practices for secure database access in the cloud.</p>
+]]></content>
+		</item>
 		
 		<item>
 			<title>Leveraging AWS Roles for Enhanced Security in GitHub Workflows</title>
