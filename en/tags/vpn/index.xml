@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>VPN on Ryan Derr&#39;s Blog</title>
+    <link>http://www.ryanderr.dev/en/tags/vpn/</link>
+    <description>Recent content in VPN on Ryan Derr&#39;s Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 30 Dec 2023 12:30:35 -0500</lastBuildDate>
+    <atom:link href="http://www.ryanderr.dev/en/tags/vpn/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>AWS Wireguard Vpn Via Terraform</title>
+      <link>http://www.ryanderr.dev/en/posts/aws-wireguard-vpn-terraform/</link>
+      <pubDate>Sat, 30 Dec 2023 12:30:35 -0500</pubDate>
+      <guid>http://www.ryanderr.dev/en/posts/aws-wireguard-vpn-terraform/</guid>
+      <description>&lt;h2 id=&#34;introducing-the-ec2-wireguard-vpn-terraform-module&#34;&gt;Introducing the EC2 WireGuard VPN Terraform Module&lt;/h2&gt;&#xA;&lt;p&gt;In the ever-evolving landscape of the digital age, ensuring secure and efficient communication is paramount. Virtual Private Networks (VPNs) play a crucial role in establishing secure connections, and with the rise of cloud services, creating VPN solutions leveraging the cloud is easier than ever. Today, I am excited to introduce a powerful tool that simplifies the process of setting up a WireGuard VPN on an AWS EC2 instance – my open source &lt;a href=&#34;https://registry.terraform.io/modules/RyanDerr/ec2-wireguard-vpn/aws/latest?tab=inputs&#34;&gt;EC2 WireGuard VPN Terraform Module&lt;/a&gt;.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

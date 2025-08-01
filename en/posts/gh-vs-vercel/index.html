@@ -1,0 +1,154 @@
+
+
+<!DOCTYPE html>
+<html lang="en-us">
+<head><meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="robots" content="index, follow">
+<meta name="revisit-after" content="15 days">
+<link rel="author" href="/humans.txt">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="msapplication-TileImage" content="/mstile-144x144.png">
+<link rel="shortcut icon" href="/favicon.ico">
+<meta name="theme-color" content="#494f5c">
+<meta name="msapplication-TileColor" content="#494f5c">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#494f5c"><meta name="author" content="Ryan Derr"><meta name="description" content="Ryan Derr&#39;s Developer Blog">
+
+  <meta itemprop="name" content="GitHub Pages vs. Vercel: Choosing the Right Platform for Your Website">
+  <meta itemprop="description" content="Introduction In the world of web development, choosing the right platform to host your website is crucial. Two popular options are GitHub Pages and Vercel. Both platforms offer powerful features, but they have distinct differences that can impact your decision. In this blog post, we will explore when to use GitHub Pages and Vercel, along with their benefits and drawbacks, helping you make an informed choice for your web hosting needs.">
+  <meta itemprop="datePublished" content="2023-07-16T12:36:58-05:00">
+  <meta itemprop="dateModified" content="2023-07-16T12:36:58-05:00">
+  <meta itemprop="wordCount" content="661">
+  <meta itemprop="keywords" content="Github,Vercel,Website"><meta property="og:url" content="http://www.ryanderr.dev/en/posts/gh-vs-vercel/">
+  <meta property="og:site_name" content="Ryan Derr&#39;s Blog">
+  <meta property="og:title" content="GitHub Pages vs. Vercel: Choosing the Right Platform for Your Website">
+  <meta property="og:description" content="Introduction In the world of web development, choosing the right platform to host your website is crucial. Two popular options are GitHub Pages and Vercel. Both platforms offer powerful features, but they have distinct differences that can impact your decision. In this blog post, we will explore when to use GitHub Pages and Vercel, along with their benefits and drawbacks, helping you make an informed choice for your web hosting needs.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2023-07-16T12:36:58-05:00">
+    <meta property="article:modified_time" content="2023-07-16T12:36:58-05:00">
+    <meta property="article:tag" content="Github">
+    <meta property="article:tag" content="Vercel">
+    <meta property="article:tag" content="Website">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="GitHub Pages vs. Vercel: Choosing the Right Platform for Your Website">
+  <meta name="twitter:description" content="Introduction In the world of web development, choosing the right platform to host your website is crucial. Two popular options are GitHub Pages and Vercel. Both platforms offer powerful features, but they have distinct differences that can impact your decision. In this blog post, we will explore when to use GitHub Pages and Vercel, along with their benefits and drawbacks, helping you make an informed choice for your web hosting needs.">
+<title>GitHub Pages vs. Vercel: Choosing the Right Platform for Your Website</title>
+<link rel="stylesheet dns-prefetch preconnect preload prefetch" as="style" href="http://www.ryanderr.dev/css/style.min.eb093cb4d65495f3ab84a7232ef04554989cae69c05e5e0e9e5275bc34a5df78.css" integrity="sha256-6wk8tNZUlfOrhKcjLvBFVJicrmnAXl4OnlJ1vDSl33g=" crossorigin="anonymous">
+	</head>
+<body id="page">
+	<header id="site-header" class="animated slideInUp">
+		<div class="hdr-wrapper section-inner">
+			<div class="hdr-left">
+				<div class="site-branding">
+					<a href="http://www.ryanderr.dev/">Ryan Derr&#39;s Blog</a>
+				</div>
+				<nav class="site-nav hide-in-mobile"><a href="http://www.ryanderr.dev/en/posts/">Posts</a><a href="http://www.ryanderr.dev/en/about/">About</a></nav>
+			</div>
+			<div class="hdr-right hdr-icons">
+				<span class="hdr-social hide-in-mobile"><a href="https://www.linkedin.com/in/james-derr/" target="_blank" rel="noopener me" title="Linkedin"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a><a href="https://github.com/ryanderr" target="_blank" rel="noopener me" title="Github"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
+			</div>
+		</div>
+	</header>
+	<div id="mobile-menu" class="animated fast">
+		<ul>
+			<li><a href="http://www.ryanderr.dev/en/posts/">Posts</a></li>
+			<li><a href="http://www.ryanderr.dev/en/about/">About</a></li>
+		</ul>
+	</div>
+
+
+	<main class="site-main section-inner animated fadeIn faster"><article class="thin">
+			<header class="post-header">
+				<div class="post-meta"><span>Jul 16, 2023</span></div>
+				<h1>GitHub Pages vs. Vercel: Choosing the Right Platform for Your Website</h1>
+			</header>
+			<div class="post-info"><p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-feather"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg><a href="" target="_blank">Ryan Derr</a></p>
+<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg><span class="tag"><a href="http://www.ryanderr.dev/en/tags/github">Github</a></span><span class="tag"><a href="http://www.ryanderr.dev/en/tags/vercel">Vercel</a></span><span class="tag"><a href="http://www.ryanderr.dev/en/tags/website">Website</a></span></p>
+<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>661 Words
+    |
+    
+    
+    
+    3 Minutes</p>
+<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2023-07-16 12:36 -0500</p></div>
+			<hr class="post-end">
+			<div class="content">
+				<h3 id="introduction">Introduction<a href="#introduction" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<p>In the world of web development, choosing the right platform to host your website is crucial. Two popular options are GitHub Pages and Vercel. Both platforms offer powerful features, but they have distinct differences that can impact your decision. In this blog post, we will explore when to use GitHub Pages and Vercel, along with their benefits and drawbacks, helping you make an informed choice for your web hosting needs.</p>
+<h3 id="github-pages">GitHub Pages<a href="#github-pages" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<p><a href="https://pages.github.com/">GitHub Pages</a> is a static site hosting service offered by GitHub. It allows you to create and publish websites directly from your GitHub repositories. Here are some situations where GitHub Pages can be the right choice:</p>
+<ol>
+<li>
+<p><strong>Simple Static Websites</strong>: GitHub Pages is an excellent option for static websites built with HTML, CSS, and JavaScript. If your site does not require server-side rendering or backend logic, GitHub Pages provides an easy and hassle-free way to publish your content.</p>
+</li>
+<li>
+<p><strong>Version Control Integration</strong>: If your website&rsquo;s source code is already managed on GitHub, using GitHub Pages allows for seamless integration between your codebase and your hosting platform. Any updates pushed to your repository will automatically be reflected on your live website.</p>
+</li>
+</ol>
+<h3 id="benefits-of-github-pages">Benefits of GitHub Pages<a href="#benefits-of-github-pages" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<ul>
+<li><strong>Free Hosting</strong>: GitHub Pages offers free hosting for static websites, making it an attractive choice for personal projects or small-scale websites.</li>
+<li><strong>Custom Domain Support</strong>: You can use a custom domain name with your GitHub Pages site, giving it a professional and branded identity.</li>
+<li><strong>GitHub Ecosystem</strong>: GitHub Pages seamlessly integrates with the broader GitHub ecosystem, allowing for easy collaboration and version control.</li>
+</ul>
+<h3 id="drawbacks-of-github-pages">Drawbacks of GitHub Pages<a href="#drawbacks-of-github-pages" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<ul>
+<li><strong>Limited Backend Functionality</strong>: GitHub Pages is designed for static websites only and does not support server-side code or databases. If your project requires dynamic functionality, you may need to explore other options.</li>
+<li><strong>Build Process Complexity</strong>: While GitHub Pages simplifies the deployment process, it does not provide built-in build tools. You need to pre-compile your site locally and push the static files to your repository.</li>
+</ul>
+<h2 id="vercel">Vercel<a href="#vercel" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<p><a href="https://vercel.com">Vercel</a> is a cloud platform for static and serverless deployments. It offers a modern and scalable infrastructure for hosting websites and applications. Here&rsquo;s when you should consider using Vercel:</p>
+<ol>
+<li><strong>Serverless Functions</strong>: If your website or application requires serverless functionality, such as processing form submissions, handling APIs, or server-side rendering, Vercel provides a seamless integration with its serverless functions (known as Vercel Serverless Functions or Vercel Functions). This allows you to execute code on the server side while still leveraging static site hosting.</li>
+<li><strong>Next.js and React Applications</strong>: Vercel has strong integration with Next.js, a popular React framework for building server-rendered applications. If you&rsquo;re working with Next.js, Vercel&rsquo;s built-in deployment and optimization features make it a natural fit.</li>
+</ol>
+<h3 id="benefits-of-vercel">Benefits of Vercel<a href="#benefits-of-vercel" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<ul>
+<li><strong>Serverless Functionality</strong>: Vercel&rsquo;s built-in serverless functions allow you to execute code on the server side, opening up possibilities for dynamic functionality and API integrations.</li>
+<li><strong>Easy Deployment</strong>: Vercel offers a seamless deployment experience with features like automatic previews, intelligent caching, and continuous integration, making it effortless to deploy updates to your website.</li>
+</ul>
+<h3 id="drawbacks-of-vercel">Drawbacks of Vercel<a href="#drawbacks-of-vercel" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<ul>
+<li><strong>Cost Considerations</strong>: While Vercel offers a generous free tier, it may become costly for high-traffic or resource-intensive projects. Make sure to check their pricing model to ensure it aligns with your budget.</li>
+<li><strong>Learning Curve</strong>: Compared to GitHub Pages, Vercel has a steeper learning curve, especially if you are new to serverless deployments or Next.js. It might require additional time and effort to get up to speed.</li>
+</ul>
+<h3 id="conclusion">Conclusion<a href="#conclusion" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<p>Choosing between GitHub Pages and Vercel depends on your project&rsquo;s specific requirements and technical expertise. If you have a simple static website or prefer a seamless integration with the GitHub ecosystem, GitHub Pages can be a reliable and cost-effective option. On the other hand, if you need serverless functionality or work with frameworks like Next.js, Vercel provides advanced features and a scalable infrastructure.</p>
+<p>Evaluate your project&rsquo;s needs, consider the benefits and drawbacks outlined in this blog post, and make an informed decision to ensure your website is hosted on the most suitable platform for your goals.</p>
+
+			</div>
+
+		</article>
+		<div class="post-nav thin">
+			<a class="next-post" href="http://www.ryanderr.dev/en/posts/aws-ec2-shutdown-efficiency/">
+				<span class="post-nav-label"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>&nbsp;Newer</span><br><span>AWS ECS Faster &amp; Prolonged Shutdown Efficiency</span>
+			</a>
+			<a class="prev-post" href="http://www.ryanderr.dev/en/posts/posh-git/">
+				<span class="post-nav-label">Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span><br><span>A Case For PoshGit</span>
+			</a>
+		</div>
+		<div id="comments" class="thin"></div>
+	</main>
+
+<footer id="site-footer" class="section-inner thin animated fadeIn faster">
+	<p>
+		&copy; 2025 <a href="http://www.ryanderr.dev/">Ryan Derr</a>
+		&#183; CC BY-NC 4.0
+		
+		&#183; <a href="http://www.ryanderr.dev/en/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
+		
+	</p>
+
+</footer>
+<script async src="http://www.ryanderr.dev/js/bundle.min.038214de9d568246fadcfeb06c69349925de3209f332ec123861b6aa031d63c6.js" integrity="sha256-A4IU3p1Wgkb63P6wbGk0mSXeMgnzMuwSOGG2qgMdY8Y=" crossorigin="anonymous"></script>
+</body>
+
+</html>

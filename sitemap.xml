@@ -1,77 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-  xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  <url>
-    <loc>http://www.ryanderr.dev/tags/aws/</loc>
-    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/posts/aws-psql-rds-iam-auth/</loc>
-    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/github/</loc>
-    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/iam/</loc>
-    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/postgresql/</loc>
-    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/posts/</loc>
-    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/rds/</loc>
-    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/</loc>
-    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/</loc>
-    <lastmod>2024-10-18T16:21:27-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/posts/aws-terraform-github-auth/</loc>
-    <lastmod>2024-05-03T01:53:29-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/terraform/</loc>
-    <lastmod>2024-05-03T01:53:29-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/about/</loc>
-    <lastmod>2024-03-17T14:41:01-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/about/</loc>
-    <lastmod>2024-03-17T14:41:01-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/posts/aws-wireguard-vpn-terraform/</loc>
-    <lastmod>2023-12-30T12:30:35-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/cloud/</loc>
-    <lastmod>2023-12-30T12:30:35-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/ec2/</loc>
-    <lastmod>2023-12-30T12:30:35-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/vpn/</loc>
-    <lastmod>2023-12-30T12:30:35-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/posts/aws-ec2-shutdown-efficiency/</loc>
-    <lastmod>2023-07-30T12:38:29-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/ecs/</loc>
-    <lastmod>2023-07-30T12:38:29-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/posts/gh-vs-vercel/</loc>
-    <lastmod>2023-07-16T12:36:58-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/vercel/</loc>
-    <lastmod>2023-07-16T12:36:58-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/website/</loc>
-    <lastmod>2023-07-16T12:36:58-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/posts/posh-git/</loc>
-    <lastmod>2023-03-16T12:42:42-05:00</lastmod>
-  </url><url>
-    <loc>http://www.ryanderr.dev/tags/git/</loc>
-    <lastmod>2023-03-16T12:42:42-05:00</lastmod>
-  </url>
-</urlset>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <sitemap>
+    <loc>http://www.ryanderr.dev/en/sitemap.xml</loc>
+    
+      <lastmod>2025-07-24T10:00:00-05:00</lastmod>
+    
+  </sitemap>
+  
+</sitemapindex>

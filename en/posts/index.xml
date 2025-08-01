@@ -1,0 +1,626 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Posts on Ryan Derr&#39;s Blog</title>
+		<link>http://www.ryanderr.dev/en/posts/</link>
+		<description>Recent content in Posts on Ryan Derr&#39;s Blog</description>
+		<generator>Hugo -- gohugo.io</generator>
+		<language>en-us</language>
+		<lastBuildDate>Thu, 24 Jul 2025 10:00:00 -0500</lastBuildDate>
+		<atom:link href="http://www.ryanderr.dev/en/posts/index.xml" rel="self" type="application/rss+xml" />
+		
+		<item>
+			<title>Secure Access to Private Cassandra with HashiCorp Boundary</title>
+			<link>http://www.ryanderr.dev/en/posts/boundary-cassandra-hcp-demo/</link>
+			<pubDate>Thu, 24 Jul 2025 10:00:00 -0500</pubDate>
+			
+			<guid>http://www.ryanderr.dev/en/posts/boundary-cassandra-hcp-demo/</guid>
+			<description><![CDATA[%!s(<nil>)]]></description>
+			<content type="html"><![CDATA[<p>While building a project with a full AWS stack, I needed Cassandra as my database solution. Initially, I looked into AWS Keyspaces (Amazon&rsquo;s managed Cassandra service), but discovered it doesn&rsquo;t offer a way to keep your service endpoints truly private. In lieu of this, I decided to self-host a Cassandra DB instance on a private EC2 instance, allowing me to set my ingress and egress through a private IP. However, this exposed a new challenge: how do you securely access and manage a database that you&rsquo;ve intentionally made unreachable from the internet?</p>
+<p>The traditional solutions like VPNs or bastion hosts felt too loose since I didn&rsquo;t want to grant broad network access just to reach one database. After exploring various options, I made my choice, HashiCorp Boundary, which turned out to be exactly what I needed for secure, identity-based access to private resources.</p>
+<h2 id="the-challenge">The Challenge</h2>
+<p>Traditional approaches to securing database access often involve:</p>
+<ul>
+<li>VPNs that provide overly broad network access</li>
+<li>Bastion hosts that become single points of failure</li>
+<li>Shared credentials that are difficult to rotate and audit</li>
+</ul>
+<p>HashiCorp Boundary solves these challenges by providing just-in-time, identity-based access to specific resources.</p>
+<h2 id="what-is-hashicorp-boundary">What is HashiCorp Boundary</h2>
+<p>HashiCorp Boundary is a remote access solution that acts as an identity-aware proxy, creating secure tunnels between users and target systems. It operates as a control plane that manages workers deployed across your infrastructure, establishing encrypted connections to target machines/services. Boundary supports multiple authentication backends including OIDC, LDAP, and username/password, allowing integration with existing identity providers. The platform provides additional features such as session recording, real-time monitoring, and audit logs for compliance and security oversight.</p>
+<h2 id="solution-overview">Solution Overview</h2>
+<p>Using HCP Boundary with self-managed workers, we can create a secure proxy architecture that:</p>
+<ul>
+<li><strong>Eliminates credential sharing</strong> - Access is identity-based, not credential-based</li>
+<li><strong>Provides zero-trust access</strong> - Resources remain private by default</li>
+<li><strong>Supports dynamic authorization</strong> - Permissions can be granted just-in-time</li>
+</ul>
+<h2 id="demo-architecture">Demo Architecture</h2>
+<p>I&rsquo;ve created a Terraform demo that showcases this pattern using AWS and Apache Cassandra. The Terraform automates the entire infrastructure provisioning and configuration process, including EC2 instances with proper security groups, Boundary worker installation, and Cassandra setup with authentication enabled. This setup leverages controller-led registration, which is a feature of HashiCorp Boundary that allows for controller-based worker discovery and connection. This method eliminates manual worker configuration steps, uses HCP-generated activation tokens for secure registration, and automatically applies worker tags for easy target identification. After applying Terraform, you should see the following:</p>
+<h3 id="infrastructure-components">Infrastructure Components</h3>
+<ul>
+<li><strong>VPC with public/private subnets</strong> - Proper network isolation</li>
+<li><strong>Boundary Worker (EC2)</strong> - Self-managed worker in public subnet for external connectivity</li>
+<li><strong>Cassandra Database (EC2)</strong> - Private database instance with no direct internet access</li>
+<li><strong>Security Groups</strong> - Strict network controls allowing only necessary traffic</li>
+<li><strong>NAT Gateway</strong> - Controlled outbound access for private resources</li>
+</ul>
+<h3 id="boundary-configuration">Boundary Configuration</h3>
+<ul>
+<li><strong>Controller-led registration</strong> - Automated worker registration with HCP Boundary</li>
+<li><strong>Worker tags</strong> - Proper tagging for target filtering to ensure that the worker with access to the target is the one that is used to proxy traffic</li>
+</ul>
+<h2 id="architecture-overview">Architecture Overview</h2>
+<p>The following diagram illustrates the complete architecture and data flow for accessing a private Cassandra database through HCP Boundary with self-managed workers:</p>
+<p><img src="boundary-cassandra-architecture.png" alt="HCP Boundary Cassandra Architecture"></p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before running the demo, you&rsquo;ll need:</p>
+<ol>
+<li><strong>AWS Account</strong> with permissions to create VPC, EC2, and networking resources</li>
+<li><strong>AWS CLI</strong> configured with valid credentials</li>
+<li><strong>Terraform</strong> v1.12.2 or later installed</li>
+<li><strong>HCP Boundary Cluster</strong> with admin access</li>
+<li><strong>cqlsh</strong> installed locally for connecting to Cassandra</li>
+<li><strong>AWS Key Pair</strong> for SSH access and EC2 standup</li>
+</ol>
+<h2 id="quick-start">Quick Start</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git clone https://github.com/RyanDerr/boundary-cassandra-terraform
+</span></span><span style="display:flex;"><span>cd boundary-cassandra-terraform
+</span></span><span style="display:flex;"><span>cp terraform.tfvars.example terraform.tfvars
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Edit terraform.tfvars to suit your configuration</span>
+</span></span><span style="display:flex;"><span>terraform init
+</span></span><span style="display:flex;"><span>terraform apply
+</span></span></code></pre></div><p>The deployment creates all necessary infrastructure and automatically:</p>
+<ul>
+<li>Registers the worker with your HCP Boundary cluster</li>
+<li>Configures Cassandra with authentication enabled</li>
+<li>Sets up proper network security and routing</li>
+</ul>
+<h3 id="outputs">Outputs</h3>
+<p>After successful deployment, Terraform provides:</p>
+<ul>
+<li>Boundary worker public IP and connection details already registered to your HCP Boundary cluster</li>
+<li>Cassandra EC2 setup and running with private IP for target configuration</li>
+<li>Worker tags for setting up Boundary targets</li>
+<li>Security group IDs and VPC information</li>
+</ul>
+<h2 id="connecting-to-cassandra-via-boundary">Connecting to Cassandra via Boundary</h2>
+<p>Once your infrastructure is deployed, you can connect to the private Cassandra instance using Boundary. Here&rsquo;s how to set up and use the connection:</p>
+<h3 id="setting-up-the-boundary-target">Setting Up the Boundary Target</h3>
+<ol>
+<li>
+<p><strong>Create a Target</strong> directly in your HCP Boundary console:</p>
+<ul>
+<li>Navigate to Targets</li>
+<li>Click &ldquo;New Target&rdquo;</li>
+<li><strong>Type</strong>: TCP</li>
+<li><strong>Name</strong>: <code>cassandra-db</code></li>
+<li><strong>Default Port</strong>: 9042 (Cassandra&rsquo;s native protocol port)</li>
+<li><strong>Address</strong>: Enter the Cassandra private IP address (from Terraform outputs)</li>
+<li><strong>Worker Filter</strong>: Use tags to specify which worker should handle connections
+<pre tabindex="0"><code>&#34;cassandra-access&#34; in &#34;/tags/type&#34;
+</code></pre></li>
+<li><strong>Session Connection Limit</strong>: 1 (or as needed)</li>
+<li><strong>Alias</strong>: <code>cassandra-db</code> for an easy to remember name when issuing the command to connect to the target</li>
+</ul>
+</li>
+<li>
+<p><strong>Configure Static Credentials</strong>:</p>
+<ul>
+<li>Navigate to Credential Stores</li>
+<li>Create a new Static Credential Store</li>
+<li>Add username/password credentials for Cassandra authentication
+<ul>
+<li>By default Cassandra uses cassandra/cassandra</li>
+</ul>
+</li>
+<li>Attach the credential to your target</li>
+</ul>
+</li>
+</ol>
+<h3 id="connecting-via-boundary-cli">Connecting via Boundary CLI</h3>
+<p>With your target and alias configured, connect to Cassandra:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Set the HCP Boundary cluster address</span>
+</span></span><span style="display:flex;"><span>export BOUNDARY_ADDR<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://your-cluster-id.boundary.hashicorp.cloud&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Set the authentication method ID</span>
+</span></span><span style="display:flex;"><span>export BOUNDARY_AUTH_METHOD_ID<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;ampw_1234567890&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Connect using the alias</span>
+</span></span><span style="display:flex;"><span>boundary connect cassandra cassandra-db
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Alternative: Connect to a specific keyspace</span>
+</span></span><span style="display:flex;"><span>boundary connect cassandra cassandra-db -keyspace system
+</span></span></code></pre></div><p>The <code>boundary connect cassandra</code> command will:</p>
+<ul>
+<li>Establish a secure tunnel through the designated worker</li>
+<li>Automatically inject the configured static credentials</li>
+<li>Launch a cqlsh session connected to your private Cassandra instance</li>
+</ul>
+<h3 id="example-connection-flow">Example Connection Flow</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ boundary connect cassandra cassandra-db
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Connected to Ryan EC2 Cluster at 127.0.0.1:55005.
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>cqlsh 6.0.0 | Cassandra 4.0.0 | CQL spec 3.4.5 | Native protocol v4<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>Use HELP <span style="color:#66d9ef">for</span> help.
+</span></span><span style="display:flex;"><span>cassandra@cqlsh&gt;
+</span></span></code></pre></div><h3 id="verifying-the-connection">Verifying the Connection</h3>
+<p>Once connected, you can verify your Cassandra access:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cql" data-lang="cql"><span style="display:flex;"><span><span style="color:#75715e">-- Check cluster information
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">SELECT</span> cluster_name <span style="color:#66d9ef">FROM</span> system.local;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- List keyspaces
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>DESCRIBE <span style="color:#66d9ef">keyspaces</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Create a test keyspace
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">KEYSPACE</span> test_boundary <span style="color:#66d9ef">WITH</span> <span style="color:#66d9ef">replication</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#39;class&#39;</span>: <span style="color:#e6db74">&#39;SimpleStrategy&#39;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#39;replication_factor&#39;</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Use the keyspace
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">USE</span> test_boundary;
+</span></span></code></pre></div><h3 id="session-management">Session Management</h3>
+<p>Boundary provides excellent session visibility:</p>
+<ul>
+<li>View active sessions in the HCP Boundary console</li>
+<li>Monitor connection duration and usage</li>
+<li>Terminate sessions as needed for security compliance</li>
+<li>Review session logs and audit trails</li>
+</ul>
+<h2 id="important-limitation">Important Limitation</h2>
+<p><strong>Authentication Support</strong>: Currently, Boundary only supports Cassandra&rsquo;s <code>PasswordAuthenticator</code></p>
+<p>This limitation is important to consider when integrating Boundary with existing Cassandra clusters that may use different authentication mechanisms.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>HCP Boundary with self-managed workers provides a solution for securing access to private database resources without the complexity of VPNs or bastion hosts. This demo showcases how modern zero-trust patterns can be implemented with minimal infrastructure overhead.</p>
+<p>Ready to try it yourself? Check out my <a href="https://github.com/RyanDerr/boundary-cassandra-terraform">demo repository</a> and start securing your database access today.</p>
+<blockquote>
+<p><strong>Note</strong>: The <code>boundary connect cassandra</code> command is currently in testing phase and not yet released in a major or minor version as of this blog post&rsquo;s publication date. Check the <a href="https://developer.hashicorp.com/boundary/docs/release-notes">Boundary release notes</a> for the latest availability.</p></blockquote>
+]]></content>
+		</item>
+		
+		<item>
+			<title>AWS Postgres RDS IAM Authentication</title>
+			<link>http://www.ryanderr.dev/en/posts/aws-psql-rds-iam-auth/</link>
+			<pubDate>Fri, 18 Oct 2024 16:21:27 -0500</pubDate>
+			
+			<guid>http://www.ryanderr.dev/en/posts/aws-psql-rds-iam-auth/</guid>
+			<description><![CDATA[%!s(<nil>)]]></description>
+			<content type="html"><![CDATA[<h1 id="securely-accessing-aws-postgresql-rds-instances-with-iam">Securely Accessing AWS PostgreSQL RDS Instances With IAM</h1>
+<p>Relational database services have long been a cornerstone for storing and retrieving application data, dating back to the 1970s. However, managing credentials for applications, users, and administrators has always been a challenge due to the static nature of traditional credentials. With AWS RDS, we can address this issue by offering built-in IAM authentication for RDS PostgreSQL, enabling secure, short-lived access scoped to specific users or groups. Additionally, this approach enhances auditing capabilities by allowing detailed tracking of who accessed the database and when.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before setting up secure PostgreSQL authentication, ensure you have the following:</p>
+<ul>
+<li>An AWS account with administrative access.</li>
+<li>AWS CLI with account configuration connected.</li>
+<li>An RDS PostgreSQL instance.</li>
+<li>PSQL installed.</li>
+<li>Terraform installed on your local machine with AWS provider configured.</li>
+</ul>
+<h2 id="step-1-set-up-iam-roles-and-policies">Step 1: Set Up IAM Roles and Policies</h2>
+<p>In this step, we&rsquo;ll create an IAM policy and attach it to a group that will be used to authenticate to the RDS instance.</p>
+<h3 id="terraform-configuration">Terraform Configuration</h3>
+<p>First, define the necessary variables (we&rsquo;ll assume you have a way of securely inserting your account ID, but for now, we&rsquo;ll use a variable) that will be used within the following steps:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-hcl" data-lang="hcl"><span style="display:flex;"><span><span style="color:#66d9ef">variable</span> <span style="color:#e6db74">&#34;account_id&#34;</span> {
+</span></span><span style="display:flex;"><span>  description <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;The AWS account ID&#34;</span>
+</span></span><span style="display:flex;"><span>  type        <span style="color:#f92672">=</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">variable</span> <span style="color:#e6db74">&#34;usergroup_name&#34;</span> {
+</span></span><span style="display:flex;"><span>  description <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;The name of the IAM group for database users&#34;</span>
+</span></span><span style="display:flex;"><span>  type        <span style="color:#f92672">=</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>  default     <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;DatabaseUsers&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">variable</span> <span style="color:#e6db74">&#34;db_iam_user&#34;</span> {
+</span></span><span style="display:flex;"><span>  type        <span style="color:#f92672">=</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>  description <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;The name of the IAM user for the database&#34;</span>
+</span></span><span style="display:flex;"><span>  default     <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;db_users&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">variable</span> <span style="color:#e6db74">&#34;region&#34;</span> {
+</span></span><span style="display:flex;"><span>  description <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;The AWS region where the RDS instance is located&#34;</span>
+</span></span><span style="display:flex;"><span>  type        <span style="color:#f92672">=</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>  default     <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;us-west-2&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">variable</span> <span style="color:#e6db74">&#34;db_instance_id&#34;</span> {
+</span></span><span style="display:flex;"><span>  description <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;The resource ID of the RDS instance&#34;</span>
+</span></span><span style="display:flex;"><span>  type        <span style="color:#f92672">=</span> <span style="color:#66d9ef">string</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><em><strong>Note</strong></em>: We defaulted the database user to <code>db_users</code> if none is provided, and for future access examples will utilize that IAM name. In practice, you can provide any name you&rsquo;d like and change the subsequent commands for accessing the RDS instance.</p>
+<h3 id="create-the-iam-policy">Create The IAM Policy</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-hcl" data-lang="hcl"><span style="display:flex;"><span><span style="color:#66d9ef">resource</span> <span style="color:#e6db74">&#34;aws_iam_policy&#34; &#34;db_policy&#34;</span> {
+</span></span><span style="display:flex;"><span>  name        <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;DatabaseAccessPolicy&#34;</span>
+</span></span><span style="display:flex;"><span>  description <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Policy for IAM user to connect to RDS instance&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  policy <span style="color:#f92672">=</span> <span style="color:#66d9ef">jsonencode</span>({
+</span></span><span style="display:flex;"><span>    Version <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;2012-10-17&#34;</span>,
+</span></span><span style="display:flex;"><span>    Statement <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        Effect <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Allow&#34;</span>,
+</span></span><span style="display:flex;"><span>        Action <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>          <span style="color:#e6db74">&#34;rds-db:connect&#34;</span>
+</span></span><span style="display:flex;"><span>        ],
+</span></span><span style="display:flex;"><span>        Resource <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>          <span style="color:#e6db74">&#34;arn:aws:rds-db:${var.region}:${var.account_id}:dbuser:${var.db_instance_id}/${var.db_iam_user}&#34;</span>
+</span></span><span style="display:flex;"><span>        ]
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>  })
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  tags <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    Environment <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;production&#34;</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The <code>aws_iam_policy</code> resource above creates a new IAM policy named DatabaseAccessPolicy. This policy allows the <code>rds-db:connect</code> action on a specific RDS database user. The Resource field specifies the ARN of the RDS database user, which is constructed using the provided variables and is tagged with an environment label <code>production</code>.</p>
+<p>For more information on Terraform&rsquo;s creation of the policy, refer to the official <a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy">aws_iam_policy</a> documentation.</p>
+<h3 id="attach-policy-to-group">Attach Policy To Group</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-hcl" data-lang="hcl"><span style="display:flex;"><span><span style="color:#66d9ef">resource</span> <span style="color:#e6db74">&#34;aws_iam_group_policy_attachment&#34; &#34;db_policy_attachment&#34;</span> {
+</span></span><span style="display:flex;"><span>  group      <span style="color:#f92672">=</span> <span style="color:#66d9ef">var</span>.<span style="color:#66d9ef">usergroup_name</span>
+</span></span><span style="display:flex;"><span>  policy_arn <span style="color:#f92672">=</span> <span style="color:#66d9ef">aws_iam_policy</span>.<span style="color:#66d9ef">db_policy</span>.<span style="color:#66d9ef">arn</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The <code>aws_iam_group_policy_attachment</code> resource we&rsquo;ve just created attaches the previously created DatabaseAccessPolicy to an existing IAM group specified by the <code>usergroup_name</code> variable. This allows all users in the specified IAM group to use the permissions defined in the DatabaseAccessPolicy. For this guide, we&rsquo;ll presume that this AWS group already exists and the users desiring to access the DB are already members.</p>
+<p>For more information on Terraform&rsquo;s policy group attachment, refer to <a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_group_policy_attachment">aws_iam_group_policy_attachment</a> documentation.</p>
+<h2 id="step-2-enable-iam-authentication-on-your-rds-instances">Step 2: Enable IAM Authentication On Your RDS Instances</h2>
+<p>Now that we&rsquo;ve configured a user with the permissions within AWS to access the database, we need to configure RDS PostgreSQL to recognize and accept the AWS IAM authentication method. There are a few ways to achieve this.</p>
+<h3 id="terraform-configuration-1">Terraform Configuration</h3>
+<p>If you are already using Terraform for your project, or just because we used it in a previous step, we can enable it with the flag <code>iam_database_authentication_enabled</code> on a <a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance">aws_db_instance</a>. This boolean flag enables a mapping of AWS IAM accounts to database accounts.</p>
+<h3 id="aws-cli">AWS CLI</h3>
+<p>If you prefer to do this with a CLI tool, AWS has you covered with the handy <a href="https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance">modify-db-instance</a> command.</p>
+<p>An example of enabling IAM authentication with this command is as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>aws rds modify-db-instance <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --db-instance-identifier &lt;insert-db-identifier&gt; <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --enable-iam-database-authentication <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --apply-immediately
+</span></span></code></pre></div><h2 id="step-3-create-the-database-user">Step 3: Create the Database User</h2>
+<p>After enabling IAM authentication on your RDS instance, you need to create a PostgreSQL user that matches the IAM user. This user will be used to authenticate against the database using the IAM-generated token.</p>
+<p>You can utilize <a href="https://www.postgresql.org/docs/current/app-psql.html">psql</a> or a database migration tool such as <a href="https://docs.liquibase.com/concepts/introduction-to-liquibase.html">Liquibase</a> for Java or <a href="https://pkg.go.dev/github.com/golang-migrate/migrate/v4">golang-migrate</a> for GO.</p>
+<p>In either case, you can utilize the following SQL to create and map IAM to a newly created PostgreSQL user.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-SQL" data-lang="SQL"><span style="display:flex;"><span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">USER</span> db_users <span style="color:#66d9ef">WITH</span> LOGIN;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">GRANT</span> rds_iam <span style="color:#66d9ef">TO</span> db_users;
+</span></span></code></pre></div><h2 id="step-4-connecting-to-your-rds-database">Step 4: Connecting To Your RDS Database</h2>
+<p>Lastly, we need to grab our token and log in to our database.</p>
+<p>To generate a token in AWS RDS, we can utilize the AWS CLI command <a href="https://docs.aws.amazon.com/cli/latest/reference/rds/generate-db-auth-token.html">generate-db-auth-token</a>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>aws rds generate-db-auth-token <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --hostname <span style="color:#f92672">{</span>db-endpoint<span style="color:#f92672">}</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --port <span style="color:#f92672">{</span>db-port<span style="color:#f92672">}</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --region <span style="color:#f92672">{</span>aws-region<span style="color:#f92672">}</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    --username db_users <span style="color:#75715e"># This is taken from the user created for IAM access in the previous steps</span>
+</span></span></code></pre></div><p>Once the command is issued, it will return a short-lived authentication token tied directly to our IAM group.</p>
+<p>Example token:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>mydb.123456789012.us-east-1.rds.amazonaws.com:3306/?Action<span style="color:#f92672">=</span>connect&amp;DBUser<span style="color:#f92672">=</span>db_user&amp;X-Amz-Algorithm<span style="color:#f92672">=</span>AWS4-HMAC-SHA256&amp;X-Amz-Credential<span style="color:#f92672">=</span>AKIAIEXAMPLE%2Fus-east-1%2Frds-db%2Faws4_request&amp;X-Amz-Date<span style="color:#f92672">=</span>20210123T011543Z&amp;X-Amz-Expires<span style="color:#f92672">=</span>900&amp;X-Amz-SignedHeaders<span style="color:#f92672">=</span>host&amp;X-Amz-Signature<span style="color:#f92672">=</span>88987EXAMPLE1EXAMPLE2EXAMPLE3EXAMPLE4EXAMPLE5EXAMPLE6
+</span></span></code></pre></div><p>With this returned token, we can now connect to our database in AWS with <code>psql</code> using the following command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>psql <span style="color:#e6db74">&#34;host=&lt;rds-endpoint&gt; port=5432 dbname=&lt;db-name&gt; user=db_user password=&lt;iam-token&gt; sslrootcert=&lt;certificateFile&gt; sslmode=verify-full&#34;</span>
+</span></span></code></pre></div><p><em><strong>Note</strong></em>: In order to connect, you may need to utilize a <a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html#UsingWithRDS.SSL.CertificatesAllRegions">certificate</a> file provided by AWS to access RDS databases.</p>
+<h2 id="final-thoughts">Final Thoughts</h2>
+<p>By following this guide, you have successfully set up IAM authentication for your AWS RDS PostgreSQL database. This approach enhances the security of your database by leveraging AWS IAM roles and policies, reducing the need for static database credentials. You have learned how to create an IAM user, configure RDS for IAM authentication, generate an authentication token using the AWS CLI, and connect to your database using <code>psql</code>. This method not only simplifies credential management but also aligns with best practices for secure database access in the cloud.</p>
+]]></content>
+		</item>
+		
+		<item>
+			<title>Leveraging AWS Roles for Enhanced Security in GitHub Workflows</title>
+			<link>http://www.ryanderr.dev/en/posts/aws-terraform-github-auth/</link>
+			<pubDate>Fri, 03 May 2024 01:53:29 -0500</pubDate>
+			
+			<guid>http://www.ryanderr.dev/en/posts/aws-terraform-github-auth/</guid>
+			<description><![CDATA[%!s(<nil>)]]></description>
+			<content type="html"><![CDATA[<h1 id="moving-away-from-aws-access-keys">Moving Away From AWS Access Keys</h1>
+<p>For a considerable period, I, like many others, relied on Terraform to provision my resources within AWS. Terraform, right out of the box, offers multiple authentication methods to access, provision, modify, or destroy resources, not to mention its support for remote state.</p>
+<p>In the beginning, I opted for the straightforward approach, using <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> for a pipeline user to handle the authentication. However, I soon encountered a significant challenge. I wanted to retain exclusive approval rights for changes to AWS via a GitHub environment, while my collaborators needed access to the AWS state to perform plans and ensure the proposed changes would function as expected.</p>
+<p>One solution could have been to create another AWS account with access only to the states. However, this would lead to an increase in the number of users and, consequently, more credentials at risk of exposure and compromise.</p>
+<p>To avoid this logistical conundrum, I discovered a more secure and efficient way to authorize and perform actions against AWS within my repository - <strong>AWS roles</strong> for my agents!</p>
+<p>In the following sections, we will delve into how to use AWS roles within GitHub workflows as an alternative to using access and secret keys. This method not only enhances security but also aligns with the best practices for AWS access management.</p>
+<h2 id="the-power-of-aws-roles-what-they-are-and-why-they-matter">The Power of AWS Roles: What They Are and Why They Matter</h2>
+<p>AWS roles are a potent tool in your AWS arsenal. They offer a secure method to delegate permissions to trusted entities, eliminating the need for long-term credentials. Instead of relying on permanent access keys, AWS roles utilize temporary security credentials. This approach significantly minimizes the risk of credential exposure, thereby bolstering the security of your AWS operations.</p>
+<p>But the power of AWS roles doesn&rsquo;t stop there. They offer a level of flexibility and control that goes beyond users. You can assign roles to specific repositories, branches, and even workflows, providing a granular level of access control.</p>
+<p>Moreover, you can define a policy that precisely outlines the scope of what the role can do within AWS. This way, you can ensure that the role grants permissions only for the necessary resources and actions, further enhancing the security of your AWS operations. This approach aligns with the principle of least privilege, a widely recognized best practice in access management.</p>
+<h2 id="integrating-aws-roles-with-github-workflows">Integrating AWS Roles with GitHub Workflows</h2>
+<p>To integrate AWS roles with GitHub workflows:</p>
+<ol>
+<li>Install the <code>configure-aws-credentials</code> action from the GitHub marketplace.</li>
+<li>In your workflow file, use the <code>configure-aws-credentials</code> action to set up AWS credentials.</li>
+<li>Use the <code>role-to-assume</code> parameter to specify the ARN of the role to assume.</li>
+</ol>
+<h2 id="create-aws-policy">Create AWS Policy</h2>
+<p>The IAM policy grants Terraform the necessary permissions to manage a specific DynamoDB table and S3 bucket in AWS that we will later assign to a role. These resources are used by Terraform for state management, with the DynamoDB table for state locking and the S3 bucket for storing state files.</p>
+<p>Follow the steps below to create a new policy in AWS IAM and attach it to an IAM role. Make sure to replace <code>&lt;region&gt;</code>, <code>&lt;account-id&gt;</code>, <code>&lt;dynamodb-table-name&gt;</code>, and <code>&lt;bucket-name&gt;</code> with your specific values.</p>
+<ol>
+<li>
+<p>Create a new policy in AWS IAM</p>
+<ul>
+<li>Navigate to the AWS Management Console and open the IAM service.</li>
+<li>In the left navigation pane, choose &ldquo;Policies&rdquo;, then &ldquo;Create policy&rdquo;.</li>
+<li>Choose the &ldquo;JSON&rdquo; tab and paste the following policy:</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;Version&#34;</span>: <span style="color:#e6db74">&#34;2012-10-17&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;Statement&#34;</span>: [
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Effect&#34;</span>: <span style="color:#e6db74">&#34;Allow&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Action&#34;</span>: [
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;dynamodb:*&#34;</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;s3:*&#34;</span>
+</span></span><span style="display:flex;"><span>            ],
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Resource&#34;</span>: [
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;arn:aws:dynamodb:&lt;region&gt;:&lt;account-id&gt;:table/&lt;dynamodb-table-name&gt;&#34;</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;arn:aws:s3:::&lt;bucket-name&gt;&#34;</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;arn:aws:s3:::&lt;bucket-name&gt;/*&#34;</span>
+</span></span><span style="display:flex;"><span>            ]
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div></li>
+<li>
+<p>Attach the newly created policy <code>example-policy</code> to an IAM role</p>
+<ul>
+<li>In the IAM service, choose &ldquo;Roles&rdquo; in the left navigation pane, then &ldquo;Create role&rdquo;.</li>
+<li>Select <code>Custom trust policy</code> option and paste the following policy</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;Version&#34;</span>: <span style="color:#e6db74">&#34;2008-10-17&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&#34;Statement&#34;</span>: [
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Effect&#34;</span>: <span style="color:#e6db74">&#34;Allow&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Principal&#34;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;Federated&#34;</span>: <span style="color:#e6db74">&#34;arn:aws:iam::&lt;account-id&gt;:oidc-provider/token.actions.GitHubusercontent.com&#34;</span>
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Action&#34;</span>: <span style="color:#e6db74">&#34;sts:AssumeRoleWithWebIdentity&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#f92672">&#34;Condition&#34;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">&#34;StringLike&#34;</span>: {
+</span></span><span style="display:flex;"><span>                    <span style="color:#f92672">&#34;token.actions.GitHubusercontent.com:sub&#34;</span>: <span style="color:#e6db74">&#34;repo:&lt;GitHub Account&gt;/&lt;Repo Name&gt;:environment:AWS-Dev&#34;</span>
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This policy specifies that the role is exclusively applicable to your AWS account, and only within your repository in a particular GitHub environment, namely AWS-Dev. For further details on the conditions you can set, please refer to the official <a href="https://docs.GitHub.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services#configuring-the-role-and-trust-policy">GitHub documentation</a>. Ensure you provide the appropriate <code>&lt;GitHub Account&gt;</code> and <code>&lt;Repo Name&gt;</code> corresponding to your GitHub information.</p>
+</li>
+<li>
+<p>Attach the policy from step one to the new trust policy and create with a unique name.</p>
+<ul>
+<li>Make sure you note down the ARN for the newly created role as that&rsquo;s how GitHub will reference the role it attempts to assume.</li>
+</ul>
+</li>
+</ol>
+<h2 id="authorizing-github-workflow-to-utilize-the-assumed-role">Authorizing GitHub Workflow To Utilize The Assumed Role</h2>
+<ol>
+<li>
+<p>Securely store your Amazon Resource Name (ARN). This can be done either within your GitHub repository or as an environment secret.</p>
+<ul>
+<li><strong>GitHub Repository</strong>: If you choose to store it in your repository, make sure it is not in a publicly accessible file or location. It is recommended to use a <code>.env</code> file which is added to your <code>.gitignore</code> file to prevent it from being committed to your repository.</li>
+<li><strong>Environment Secrets</strong>: Alternatively, you can store your ARN as a secret in your GitHub repository settings. Go to your repository settings, then to the &lsquo;Secrets&rsquo; section. Here, you can add a new secret with your ARN as the value. This secret can then be accessed in your GitHub workflows.</li>
+</ul>
+</li>
+<li>
+<p>Update your workflow to setup the assumed role that it will then utilize for access to AWS resources.</p>
+<p>Here&rsquo;s an example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">name</span>: <span style="color:#ae81ff">Terraform Deploy Workflow</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">on</span>: 
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">push</span>: 
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">branches</span>: [<span style="color:#ae81ff">main]</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">permissions</span>: 
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">id-token</span>: <span style="color:#ae81ff">write</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">contents</span>: <span style="color:#ae81ff">read</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">pull-requests</span>: <span style="color:#ae81ff">write</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">jobs</span>:
+</span></span><span style="display:flex;"><span><span style="color:#f92672">deploy</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">runs-on</span>: <span style="color:#ae81ff">ubuntu-latest</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">name</span>: <span style="color:#e6db74">&#39;AWS-Dev&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">steps</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Checkout code</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">actions/checkout@v2</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Set up AWS credentials</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">aws-actions/configure-aws-credentials@v4</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">with</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">aws-region</span>: <span style="color:#ae81ff">us-west-2</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">role-to-assume</span>: {{ <span style="color:#ae81ff">secrets.ARN_TERRAFORM_BACKEND }}</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Setup Terraform</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">uses</span>: <span style="color:#ae81ff">hashicorp/setup-terraform@v3.0.0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">with</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">terraform_version</span>: <span style="color:#ae81ff">1.8.0</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ae81ff">...</span>
+</span></span></code></pre></div><p>In this example, the workflow assumes the specified AWS role and uses its permissions to read from the terraform backend in S3 and DynamoDB. Note that the ARN again is being pulled directly from a GitHub secret and the value will not be displayed directly in the run.</p>
+<p>For more about <a href="https://github.com/marketplace/actions/configure-aws-credentials-action-for-github-actions">aws-actions/configure-aws-credentials@v4</a> action, you can read the AWS documentation in GitHub.</p>
+</li>
+<li>
+<p>Upon running your workflow, it should now seamlessly fetch and utilize the assigned role for authenticating with AWS!</p>
+</li>
+</ol>
+<h2 id="final-thoughts">Final Thoughts</h2>
+<p>Using AWS roles in GitHub workflows instead of access and secret keys is a more secure and efficient way to manage AWS permissions. It not only reduces the risk of credential exposure but also simplifies the process of updating permissions.</p>
+]]></content>
+		</item>
+		
+		<item>
+			<title>AWS Wireguard Vpn Via Terraform</title>
+			<link>http://www.ryanderr.dev/en/posts/aws-wireguard-vpn-terraform/</link>
+			<pubDate>Sat, 30 Dec 2023 12:30:35 -0500</pubDate>
+			
+			<guid>http://www.ryanderr.dev/en/posts/aws-wireguard-vpn-terraform/</guid>
+			<description><![CDATA[%!s(<nil>)]]></description>
+			<content type="html"><![CDATA[<h2 id="introducing-the-ec2-wireguard-vpn-terraform-module">Introducing the EC2 WireGuard VPN Terraform Module</h2>
+<p>In the ever-evolving landscape of the digital age, ensuring secure and efficient communication is paramount. Virtual Private Networks (VPNs) play a crucial role in establishing secure connections, and with the rise of cloud services, creating VPN solutions leveraging the cloud is easier than ever. Today, I am excited to introduce a powerful tool that simplifies the process of setting up a WireGuard VPN on an AWS EC2 instance – my open source <a href="https://registry.terraform.io/modules/RyanDerr/ec2-wireguard-vpn/aws/latest?tab=inputs">EC2 WireGuard VPN Terraform Module</a>.</p>
+<h3 id="why-wireguard">Why WireGuard?</h3>
+<p>WireGuard has gained significant traction in recent years for its simplicity, performance, and security. As a modern and lightweight VPN protocol, WireGuard offers fast and secure communication, making it an ideal choice for various use cases.</p>
+<h3 id="why-terraform-with-aws-for-hosting-wireguard">Why Terraform With AWS For Hosting WireGuard?</h3>
+<p>Selecting the right hosting platform is a critical decision when deploying a WireGuard VPN, and <a href="https://aws.amazon.com/ec2/">AWS EC2</a> stands out as an excellent choice for a myriad of reasons. Let&rsquo;s explore why opting for AWS EC2 enhances the overall performance, reliability, and flexibility of your WireGuard VPN deployment. With AWS leveraging Terraform, deploying your VPN becomes templatizable and deployable within a matter of seconds. Terraform allows you to define your infrastructure as code, enabling you to version control and automate the deployment process. By using the EC2 WireGuard VPN Terraform Module on AWS, you can easily spin up and manage your VPN instances, making the deployment process streamlined and efficient.</p>
+<ol>
+<li>
+<p><strong>Global Reach and Low Latency</strong>:</p>
+<p>AWS&rsquo;s extensive global network of data centers ensures that you can deploy your WireGuard VPN instances close to your users, minimizing latency and optimizing connection speeds. This global reach is particularly advantageous for organizations with a distributed user base or those catering to international clients.</p>
+</li>
+<li>
+<p><strong>Scalability and Flexibility</strong>:</p>
+<p>AWS EC2 provides unmatched scalability, allowing you to easily adjust the size and count of your instances based on demand. Whether you&rsquo;re a startup experiencing rapid growth or an established enterprise with fluctuating VPN usage, AWS EC2 ensures that your WireGuard VPN scales seamlessly to meet your evolving needs.</p>
+</li>
+<li>
+<p><strong>Cost-Effective Infrastructure</strong>:</p>
+<p>AWS EC2&rsquo;s pay-as-you-go pricing model enables cost optimization by charging only for the resources you consume. This flexibility is advantageous, especially for businesses aiming to control costs and allocate resources efficiently. Additionally, various EC2 instance types cater to diverse performance requirements, allowing you to choose the most cost-effective option for your VPN deployment.</p>
+</li>
+<li>
+<p><strong>Reliability and Redundancy</strong>:</p>
+<p>AWS&rsquo;s commitment to providing a highly reliable infrastructure means that your WireGuard VPN benefits from robust data center facilities, redundant power systems, and network redundancy. With multiple availability zones and regions, AWS EC2 enhances the resilience of your VPN, ensuring high availability even in the face of unexpected disruptions.</p>
+</li>
+<li>
+<p><strong>Ease of Management with Terraform</strong>:</p>
+<p>The synergy between AWS EC2 and Terraform simplifies infrastructure management and deployment. Leveraging the EC2 WireGuard VPN Terraform Module on AWS ensures a streamlined and efficient process, allowing you to focus on configuring the VPN&rsquo;s specific parameters without getting bogged down by infrastructure intricacies.</p>
+</li>
+</ol>
+<h3 id="getting-started">Getting Started</h3>
+<p>Getting started with the EC2 WireGuard VPN Terraform Module is a breeze. Simply follow these steps:</p>
+<ol>
+<li>
+<p><strong>Module Installation</strong>:</p>
+<p>Use Terraform&rsquo;s module registry <a href="https://registry.terraform.io/modules/RyanDerr/ec2-wireguard-vpn/aws/latest">ec2-wireguard-vpn</a> to install the module within the offical:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-hcl" data-lang="hcl"><span style="display:flex;"><span><span style="color:#66d9ef">module</span> <span style="color:#e6db74">&#34;ec2_wireguard_vpn&#34;</span> {
+</span></span><span style="display:flex;"><span>    source <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;RyanDerr/ec2-wireguard-vpn/aws&#34;</span>
+</span></span><span style="display:flex;"><span>    version <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;X.Y.Z&#34;</span>
+</span></span><span style="display:flex;"><span>    ...
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Configuration</strong>:</p>
+<p>Customize the module by providing the necessary variables in your Terraform configuration. Refer to the <a href="https://registry.terraform.io/modules/RyanDerr/ec2-wireguard-vpn/aws/latest?tab=inputs">documentation</a> for a comprehensive list of available options.</p>
+</li>
+<li>
+<p>Terraform Init &amp; Apply:</p>
+<p>Run <code>terraform init</code> to download the necessary dependencies and <code>terraform apply</code> to provision your WireGuard VPN on AWS. The module will handle the intricate details, and you&rsquo;ll have a secure VPN up and running in no time.</p>
+</li>
+<li>
+<p>Connect to Wireguard VPN</p>
+<ul>
+<li>
+<p>Install the <a href="https://www.wireguard.com/install/">WireGuard GUI</a> application on your local machine. You can find the appropriate version for your operating system on the official WireGuard website.</p>
+</li>
+<li>
+<p>Open the WireGuard GUI application and click on the &ldquo;+&rdquo; button to add a new tunnel.</p>
+</li>
+<li>
+<p>Select &ldquo;Import tunnel(s) from file&rdquo; and choose the WireGuard configuration file downloaded to the device running Terraform from the completion of step 3.</p>
+</li>
+<li>
+<p>Once the tunnel is imported, click on the toggle switch to activate the connection.</p>
+</li>
+<li>
+<p>You should now be connected to your EC2 instance via the WireGuard VPN. You can verify the connection status in the WireGuard GUI application.</p>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="conclusion">Conclusion</h3>
+<p>With the EC2 WireGuard VPN Terraform Module, we aim to simplify the process of deploying a secure and scalable VPN solution on AWS. By leveraging the power of Terraform and AWS EC2, you can easily set up and manage your WireGuard VPN instances, taking advantage of AWS&rsquo;s global reach, scalability, cost-effectiveness, reliability, and ease of management. Whether you&rsquo;re a small startup or a large enterprise, this module provides a streamlined and efficient way to establish secure VPN connections. Start using the EC2 WireGuard VPN Terraform Module today and experience the benefits of a simplified VPN deployment on AWS.</p>
+]]></content>
+		</item>
+		
+		<item>
+			<title>AWS ECS Faster &amp; Prolonged Shutdown Efficiency</title>
+			<link>http://www.ryanderr.dev/en/posts/aws-ec2-shutdown-efficiency/</link>
+			<pubDate>Sun, 30 Jul 2023 12:38:29 -0500</pubDate>
+			
+			<guid>http://www.ryanderr.dev/en/posts/aws-ec2-shutdown-efficiency/</guid>
+			<description><![CDATA[%!s(<nil>)]]></description>
+			<content type="html"><![CDATA[<h3 id="introduction">Introduction</h3>
+<p>Containerization has revolutionized the way applications are deployed and managed, providing enhanced scalability and agility. Amazon Elastic Container Service (<a href="https://aws.amazon.com/ecs/">ECS</a>), a highly scalable and fully managed container orchestration service, is at the forefront of this container revolution. In <a href="https://aws.amazon.com/about-aws/whats-new/2023/06/amazon-ecs-tasks-faster-prolonged-shutdown/">June 2023</a>, AWS announced a significant improvement to Amazon ECS, introducing faster and prolonged shutdown capabilities for tasks. This update aims to optimize resource utilization and enhance the overall efficiency of container management.</p>
+<h3 id="enhanced-shutdown-performance">Enhanced Shutdown Performance</h3>
+<p>One of the challenges with container orchestration is efficiently shutting down tasks, especially when dealing with large-scale deployments or time-sensitive workloads. The latest update to Amazon ECS tackles this challenge head-on by significantly improving the shutdown performance. As a result, tasks now terminate faster, freeing up resources swiftly and enabling more efficient resource allocation for other tasks.</p>
+<h3 id="the-benefits-of-faster-shutdowns">The Benefits of Faster Shutdowns</h3>
+<p>The faster shutdown capability offers several benefits to developers, DevOps teams, and organizations utilizing Amazon ECS:</p>
+<ul>
+<li>Cost Optimization: Faster task termination means more agility and improved scalability. As tasks complete faster, new tasks can be launched promptly to meet changing workload demands, enabling businesses to scale efficiently.</li>
+<li>Time-Sensitive Workloads: In scenarios where tasks have strict time constraints or deadlines, the faster shutdown feature ensures that resources are freed up promptly. This allows for efficient utilization of resources across the application lifecycle, ensuring timely completion of critical workloads.</li>
+<li>Enhanced Resource Allocation: The accelerated shutdown process allows for better resource allocation within the container cluster. Resources are freed up faster, enabling other tasks to utilize them promptly and efficiently.</li>
+</ul>
+<h3 id="prolonged-shutdowns">Prolonged Shutdowns</h3>
+<p>Alongside faster shutdowns, AWS has also introduced prolonged shutdowns for tasks in Amazon ECS. With this new feature, developers and operators can specify a grace period during which the container instance won&rsquo;t be terminated, even after a task has been shut down. This grace period allows the remaining tasks to complete any necessary cleanup operations, such as flushing caches, closing connections, or gracefully shutting down background processes.</p>
+<h3 id="the-benefits-of-prolonged-shutdowns">The Benefits of Prolonged Shutdowns:</h3>
+<p>The introduction of prolonged shutdowns offers several advantages for tasks in Amazon ECS:</p>
+<ul>
+<li>Improved Reliability: By providing a grace period for cleanup operations, prolonged shutdowns ensure that tasks can complete essential tasks before termination. This enhances the reliability of the application and prevents potential data corruption or loss.</li>
+<li>Seamless Deployment: Prolonged shutdowns enable smoother application updates and deployments. Tasks can gracefully shut down, allowing for any necessary cleanup actions before new tasks are launched, minimizing disruption to end-users.</li>
+<li>Maintenance Operations: During maintenance activities or updates, prolonged shutdowns allow for smooth transitioning between tasks and minimize any potential impact on the user experience. This feature ensures a seamless maintenance experience for developers and system administrators.</li>
+</ul>
+<h3 id="conclusion">Conclusion</h3>
+<p>The introduction of faster and prolonged shutdowns for Amazon ECS tasks marks a significant improvement in container management efficiency. With faster shutdown times, resources are freed up promptly, leading to cost optimization and improved scalability. Prolonged shutdowns ensure that tasks have ample time to complete cleanup operations, enhancing application reliability and enabling seamless deployments. These updates to Amazon ECS further solidify its position as a leading container orchestration service, empowering developers and organizations to leverage the full potential of containerization and accelerate their digital transformation journey.</p>
+]]></content>
+		</item>
+		
+		<item>
+			<title>GitHub Pages vs. Vercel: Choosing the Right Platform for Your Website</title>
+			<link>http://www.ryanderr.dev/en/posts/gh-vs-vercel/</link>
+			<pubDate>Sun, 16 Jul 2023 12:36:58 -0500</pubDate>
+			
+			<guid>http://www.ryanderr.dev/en/posts/gh-vs-vercel/</guid>
+			<description><![CDATA[%!s(<nil>)]]></description>
+			<content type="html"><![CDATA[<h3 id="introduction">Introduction</h3>
+<p>In the world of web development, choosing the right platform to host your website is crucial. Two popular options are GitHub Pages and Vercel. Both platforms offer powerful features, but they have distinct differences that can impact your decision. In this blog post, we will explore when to use GitHub Pages and Vercel, along with their benefits and drawbacks, helping you make an informed choice for your web hosting needs.</p>
+<h3 id="github-pages">GitHub Pages</h3>
+<p><a href="https://pages.github.com/">GitHub Pages</a> is a static site hosting service offered by GitHub. It allows you to create and publish websites directly from your GitHub repositories. Here are some situations where GitHub Pages can be the right choice:</p>
+<ol>
+<li>
+<p><strong>Simple Static Websites</strong>: GitHub Pages is an excellent option for static websites built with HTML, CSS, and JavaScript. If your site does not require server-side rendering or backend logic, GitHub Pages provides an easy and hassle-free way to publish your content.</p>
+</li>
+<li>
+<p><strong>Version Control Integration</strong>: If your website&rsquo;s source code is already managed on GitHub, using GitHub Pages allows for seamless integration between your codebase and your hosting platform. Any updates pushed to your repository will automatically be reflected on your live website.</p>
+</li>
+</ol>
+<h3 id="benefits-of-github-pages">Benefits of GitHub Pages</h3>
+<ul>
+<li><strong>Free Hosting</strong>: GitHub Pages offers free hosting for static websites, making it an attractive choice for personal projects or small-scale websites.</li>
+<li><strong>Custom Domain Support</strong>: You can use a custom domain name with your GitHub Pages site, giving it a professional and branded identity.</li>
+<li><strong>GitHub Ecosystem</strong>: GitHub Pages seamlessly integrates with the broader GitHub ecosystem, allowing for easy collaboration and version control.</li>
+</ul>
+<h3 id="drawbacks-of-github-pages">Drawbacks of GitHub Pages</h3>
+<ul>
+<li><strong>Limited Backend Functionality</strong>: GitHub Pages is designed for static websites only and does not support server-side code or databases. If your project requires dynamic functionality, you may need to explore other options.</li>
+<li><strong>Build Process Complexity</strong>: While GitHub Pages simplifies the deployment process, it does not provide built-in build tools. You need to pre-compile your site locally and push the static files to your repository.</li>
+</ul>
+<h2 id="vercel">Vercel</h2>
+<p><a href="https://vercel.com">Vercel</a> is a cloud platform for static and serverless deployments. It offers a modern and scalable infrastructure for hosting websites and applications. Here&rsquo;s when you should consider using Vercel:</p>
+<ol>
+<li><strong>Serverless Functions</strong>: If your website or application requires serverless functionality, such as processing form submissions, handling APIs, or server-side rendering, Vercel provides a seamless integration with its serverless functions (known as Vercel Serverless Functions or Vercel Functions). This allows you to execute code on the server side while still leveraging static site hosting.</li>
+<li><strong>Next.js and React Applications</strong>: Vercel has strong integration with Next.js, a popular React framework for building server-rendered applications. If you&rsquo;re working with Next.js, Vercel&rsquo;s built-in deployment and optimization features make it a natural fit.</li>
+</ol>
+<h3 id="benefits-of-vercel">Benefits of Vercel</h3>
+<ul>
+<li><strong>Serverless Functionality</strong>: Vercel&rsquo;s built-in serverless functions allow you to execute code on the server side, opening up possibilities for dynamic functionality and API integrations.</li>
+<li><strong>Easy Deployment</strong>: Vercel offers a seamless deployment experience with features like automatic previews, intelligent caching, and continuous integration, making it effortless to deploy updates to your website.</li>
+</ul>
+<h3 id="drawbacks-of-vercel">Drawbacks of Vercel</h3>
+<ul>
+<li><strong>Cost Considerations</strong>: While Vercel offers a generous free tier, it may become costly for high-traffic or resource-intensive projects. Make sure to check their pricing model to ensure it aligns with your budget.</li>
+<li><strong>Learning Curve</strong>: Compared to GitHub Pages, Vercel has a steeper learning curve, especially if you are new to serverless deployments or Next.js. It might require additional time and effort to get up to speed.</li>
+</ul>
+<h3 id="conclusion">Conclusion</h3>
+<p>Choosing between GitHub Pages and Vercel depends on your project&rsquo;s specific requirements and technical expertise. If you have a simple static website or prefer a seamless integration with the GitHub ecosystem, GitHub Pages can be a reliable and cost-effective option. On the other hand, if you need serverless functionality or work with frameworks like Next.js, Vercel provides advanced features and a scalable infrastructure.</p>
+<p>Evaluate your project&rsquo;s needs, consider the benefits and drawbacks outlined in this blog post, and make an informed decision to ensure your website is hosted on the most suitable platform for your goals.</p>
+]]></content>
+		</item>
+		
+		<item>
+			<title>A Case For PoshGit</title>
+			<link>http://www.ryanderr.dev/en/posts/posh-git/</link>
+			<pubDate>Thu, 16 Mar 2023 12:42:42 -0500</pubDate>
+			
+			<guid>http://www.ryanderr.dev/en/posts/posh-git/</guid>
+			<description><![CDATA[%!s(<nil>)]]></description>
+			<content type="html"><![CDATA[<p>As developers, our daily workflow often revolves around Git and I&rsquo;m no different. It&rsquo;s the go-to version control system for managing code changes, collaborating with teammates, and ensuring project integrity. While I always lean toward using systems that run Bash (shoutout to Unix), that&rsquo;s not always an option and using Git from the command line can be tedious and time-consuming. Enter <strong>PoshGit</strong> - a PowerShell module designed to enhance your Git experience and streamline your workflow.</p>
+<h2 id="what-is-poshgit">What is <a href="https://github.com/dahlbyk/posh-git">PoshGit</a>?</h2>
+<p>Developed by <a href="https://github.com/dahlbyk">Keith Dahlby</a>, PoshGit is a powerful built-in PowerShell module that integrates Git functionality into your command-line interface. It provides a range of features and enhancements that make working with Git repositories more efficient and enjoyable from a CLI. With PoshGit, you can spend less time typing commands and more time focusing on writing code.</p>
+<h2 id="features-that-matter-to-me">Features That Matter To Me</h2>
+<h3 id="1-informative-git-status">1. <strong>Informative Git Status</strong></h3>
+<p>PoshGit displays relevant Git information right in your PowerShell prompt. You can instantly see the current branch name, the status of your changes (staged, unstaged, or untracked files), and other important details. This real-time feedback keeps you informed about the state of your repository without the need to run additional Git commands.</p>
+<h3 id="2-effortless-tab-completion">2. <strong>Effortless Tab Completion</strong></h3>
+<p>Gone are the days of manually typing out Git commands and branch names. PoshGit enhances tab completion, providing intelligent suggestions and completions as you type. It saves you from the hassle of remembering precise command syntax or branch names, allowing you to navigate through Git operations swiftly.</p>
+<h3 id="3-clear-branch-visualization">3. <strong>Clear Branch Visualization</strong></h3>
+<p>Understanding the branching structure of your Git repository is crucial for effective collaboration and project management. PoshGit offers a concise and visually appealing representation of your branch hierarchy. This visualization helps you grasp the relationships between branches, making it easier to navigate and work with complex branching models.</p>
+<h3 id="4-flexible-prompt-customization">4. <strong>Flexible Prompt Customization</strong></h3>
+<p>PoshGit allows you to customize your PowerShell prompt to suit your preferences. You can configure it to display the information that matters most to you, such as the current branch, repository status, or Git-related details. This flexibility ensures that your prompt provides the context and insights you need for a productive coding session.</p>
+<h2 id="how-to-get-started">How to Get Started</h2>
+<p>Getting started with PoshGit is a breeze. You can follow the <a href="https://github.com/dahlbyk/posh-git#installation">official installation instructions</a> or use the <a href="https://www.powershellgallery.com/packages/posh-git">PowerShell Gallery</a> to install the module. Once installed, you can start using PoshGit right away.</p>
+<h2 id="happy-coding">Happy coding!</h2>
+]]></content>
+		</item>
+		
+	</channel>
+</rss>

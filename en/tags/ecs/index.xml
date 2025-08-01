@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>ECS on Ryan Derr&#39;s Blog</title>
+    <link>http://www.ryanderr.dev/en/tags/ecs/</link>
+    <description>Recent content in ECS on Ryan Derr&#39;s Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 30 Jul 2023 12:38:29 -0500</lastBuildDate>
+    <atom:link href="http://www.ryanderr.dev/en/tags/ecs/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>AWS ECS Faster &amp; Prolonged Shutdown Efficiency</title>
+      <link>http://www.ryanderr.dev/en/posts/aws-ec2-shutdown-efficiency/</link>
+      <pubDate>Sun, 30 Jul 2023 12:38:29 -0500</pubDate>
+      <guid>http://www.ryanderr.dev/en/posts/aws-ec2-shutdown-efficiency/</guid>
+      <description>&lt;h3 id=&#34;introduction&#34;&gt;Introduction&lt;/h3&gt;&#xA;&lt;p&gt;Containerization has revolutionized the way applications are deployed and managed, providing enhanced scalability and agility. Amazon Elastic Container Service (&lt;a href=&#34;https://aws.amazon.com/ecs/&#34;&gt;ECS&lt;/a&gt;), a highly scalable and fully managed container orchestration service, is at the forefront of this container revolution. In &lt;a href=&#34;https://aws.amazon.com/about-aws/whats-new/2023/06/amazon-ecs-tasks-faster-prolonged-shutdown/&#34;&gt;June 2023&lt;/a&gt;, AWS announced a significant improvement to Amazon ECS, introducing faster and prolonged shutdown capabilities for tasks. This update aims to optimize resource utilization and enhance the overall efficiency of container management.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

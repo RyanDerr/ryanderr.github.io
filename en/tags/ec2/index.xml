@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>EC2 on Ryan Derr&#39;s Blog</title>
+    <link>http://www.ryanderr.dev/en/tags/ec2/</link>
+    <description>Recent content in EC2 on Ryan Derr&#39;s Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 24 Jul 2025 10:00:00 -0500</lastBuildDate>
+    <atom:link href="http://www.ryanderr.dev/en/tags/ec2/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Secure Access to Private Cassandra with HashiCorp Boundary</title>
+      <link>http://www.ryanderr.dev/en/posts/boundary-cassandra-hcp-demo/</link>
+      <pubDate>Thu, 24 Jul 2025 10:00:00 -0500</pubDate>
+      <guid>http://www.ryanderr.dev/en/posts/boundary-cassandra-hcp-demo/</guid>
+      <description>&lt;p&gt;While building a project with a full AWS stack, I needed Cassandra as my database solution. Initially, I looked into AWS Keyspaces (Amazon&amp;rsquo;s managed Cassandra service), but discovered it doesn&amp;rsquo;t offer a way to keep your service endpoints truly private. In lieu of this, I decided to self-host a Cassandra DB instance on a private EC2 instance, allowing me to set my ingress and egress through a private IP. However, this exposed a new challenge: how do you securely access and manage a database that you&amp;rsquo;ve intentionally made unreachable from the internet?&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>AWS Wireguard Vpn Via Terraform</title>
+      <link>http://www.ryanderr.dev/en/posts/aws-wireguard-vpn-terraform/</link>
+      <pubDate>Sat, 30 Dec 2023 12:30:35 -0500</pubDate>
+      <guid>http://www.ryanderr.dev/en/posts/aws-wireguard-vpn-terraform/</guid>
+      <description>&lt;h2 id=&#34;introducing-the-ec2-wireguard-vpn-terraform-module&#34;&gt;Introducing the EC2 WireGuard VPN Terraform Module&lt;/h2&gt;&#xA;&lt;p&gt;In the ever-evolving landscape of the digital age, ensuring secure and efficient communication is paramount. Virtual Private Networks (VPNs) play a crucial role in establishing secure connections, and with the rise of cloud services, creating VPN solutions leveraging the cloud is easier than ever. Today, I am excited to introduce a powerful tool that simplifies the process of setting up a WireGuard VPN on an AWS EC2 instance – my open source &lt;a href=&#34;https://registry.terraform.io/modules/RyanDerr/ec2-wireguard-vpn/aws/latest?tab=inputs&#34;&gt;EC2 WireGuard VPN Terraform Module&lt;/a&gt;.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

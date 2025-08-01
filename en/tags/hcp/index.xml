@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>HCP on Ryan Derr&#39;s Blog</title>
+    <link>http://www.ryanderr.dev/en/tags/hcp/</link>
+    <description>Recent content in HCP on Ryan Derr&#39;s Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 24 Jul 2025 10:00:00 -0500</lastBuildDate>
+    <atom:link href="http://www.ryanderr.dev/en/tags/hcp/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Secure Access to Private Cassandra with HashiCorp Boundary</title>
+      <link>http://www.ryanderr.dev/en/posts/boundary-cassandra-hcp-demo/</link>
+      <pubDate>Thu, 24 Jul 2025 10:00:00 -0500</pubDate>
+      <guid>http://www.ryanderr.dev/en/posts/boundary-cassandra-hcp-demo/</guid>
+      <description>&lt;p&gt;While building a project with a full AWS stack, I needed Cassandra as my database solution. Initially, I looked into AWS Keyspaces (Amazon&amp;rsquo;s managed Cassandra service), but discovered it doesn&amp;rsquo;t offer a way to keep your service endpoints truly private. In lieu of this, I decided to self-host a Cassandra DB instance on a private EC2 instance, allowing me to set my ingress and egress through a private IP. However, this exposed a new challenge: how do you securely access and manage a database that you&amp;rsquo;ve intentionally made unreachable from the internet?&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

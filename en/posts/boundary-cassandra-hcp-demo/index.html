@@ -1,0 +1,321 @@
+
+
+<!DOCTYPE html>
+<html lang="en-us">
+<head><meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="robots" content="index, follow">
+<meta name="revisit-after" content="15 days">
+<link rel="author" href="/humans.txt">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="msapplication-TileImage" content="/mstile-144x144.png">
+<link rel="shortcut icon" href="/favicon.ico">
+<meta name="theme-color" content="#494f5c">
+<meta name="msapplication-TileColor" content="#494f5c">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#494f5c"><meta name="author" content="Ryan Derr, Bharath Gajjala"><meta name="description" content="Ryan Derr&#39;s Developer Blog">
+
+  <meta itemprop="name" content="Secure Access to Private Cassandra with HashiCorp Boundary">
+  <meta itemprop="description" content="While building a project with a full AWS stack, I needed Cassandra as my database solution. Initially, I looked into AWS Keyspaces (Amazon’s managed Cassandra service), but discovered it doesn’t offer a way to keep your service endpoints truly private. In lieu of this, I decided to self-host a Cassandra DB instance on a private EC2 instance, allowing me to set my ingress and egress through a private IP. However, this exposed a new challenge: how do you securely access and manage a database that you’ve intentionally made unreachable from the internet?">
+  <meta itemprop="datePublished" content="2025-07-24T10:00:00-05:00">
+  <meta itemprop="dateModified" content="2025-07-24T10:00:00-05:00">
+  <meta itemprop="wordCount" content="1118">
+  <meta itemprop="keywords" content="AWS,HashiCorp,Boundary,EC2,HCP,Cassandra,Database,Security,Terraform"><meta property="og:url" content="http://www.ryanderr.dev/en/posts/boundary-cassandra-hcp-demo/">
+  <meta property="og:site_name" content="Ryan Derr&#39;s Blog">
+  <meta property="og:title" content="Secure Access to Private Cassandra with HashiCorp Boundary">
+  <meta property="og:description" content="While building a project with a full AWS stack, I needed Cassandra as my database solution. Initially, I looked into AWS Keyspaces (Amazon’s managed Cassandra service), but discovered it doesn’t offer a way to keep your service endpoints truly private. In lieu of this, I decided to self-host a Cassandra DB instance on a private EC2 instance, allowing me to set my ingress and egress through a private IP. However, this exposed a new challenge: how do you securely access and manage a database that you’ve intentionally made unreachable from the internet?">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-07-24T10:00:00-05:00">
+    <meta property="article:modified_time" content="2025-07-24T10:00:00-05:00">
+    <meta property="article:tag" content="AWS">
+    <meta property="article:tag" content="HashiCorp">
+    <meta property="article:tag" content="Boundary">
+    <meta property="article:tag" content="EC2">
+    <meta property="article:tag" content="HCP">
+    <meta property="article:tag" content="Cassandra">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Secure Access to Private Cassandra with HashiCorp Boundary">
+  <meta name="twitter:description" content="While building a project with a full AWS stack, I needed Cassandra as my database solution. Initially, I looked into AWS Keyspaces (Amazon’s managed Cassandra service), but discovered it doesn’t offer a way to keep your service endpoints truly private. In lieu of this, I decided to self-host a Cassandra DB instance on a private EC2 instance, allowing me to set my ingress and egress through a private IP. However, this exposed a new challenge: how do you securely access and manage a database that you’ve intentionally made unreachable from the internet?">
+<title>Secure Access to Private Cassandra with HashiCorp Boundary</title>
+<link rel="stylesheet dns-prefetch preconnect preload prefetch" as="style" href="http://www.ryanderr.dev/css/style.min.eb093cb4d65495f3ab84a7232ef04554989cae69c05e5e0e9e5275bc34a5df78.css" integrity="sha256-6wk8tNZUlfOrhKcjLvBFVJicrmnAXl4OnlJ1vDSl33g=" crossorigin="anonymous">
+	</head>
+<body id="page">
+	<header id="site-header" class="animated slideInUp">
+		<div class="hdr-wrapper section-inner">
+			<div class="hdr-left">
+				<div class="site-branding">
+					<a href="http://www.ryanderr.dev/">Ryan Derr&#39;s Blog</a>
+				</div>
+				<nav class="site-nav hide-in-mobile"><a href="http://www.ryanderr.dev/en/posts/">Posts</a><a href="http://www.ryanderr.dev/en/about/">About</a></nav>
+			</div>
+			<div class="hdr-right hdr-icons">
+				<button id="toc-btn" class="hdr-btn desktop-only-ib" title="Table of Contents"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-list"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3" y2="6"></line><line x1="3" y1="12" x2="3" y2="12"></line><line x1="3" y1="18" x2="3" y2="18"></line></svg></button><span class="hdr-social hide-in-mobile"><a href="https://www.linkedin.com/in/james-derr/" target="_blank" rel="noopener me" title="Linkedin"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a><a href="https://github.com/ryanderr" target="_blank" rel="noopener me" title="Github"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
+			</div>
+		</div>
+	</header>
+	<div id="mobile-menu" class="animated fast">
+		<ul>
+			<li><a href="http://www.ryanderr.dev/en/posts/">Posts</a></li>
+			<li><a href="http://www.ryanderr.dev/en/about/">About</a></li>
+		</ul>
+	</div>
+
+
+	<main class="site-main section-inner animated fadeIn faster"><article class="thin">
+			<header class="post-header">
+				<div class="post-meta"><span>Jul 24, 2025</span></div>
+				<h1>Secure Access to Private Cassandra with HashiCorp Boundary</h1>
+			</header>
+			<div class="post-info"><p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-feather"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg><a href="" target="_blank">Ryan Derr, Bharath Gajjala</a></p>
+<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg><span class="tag"><a href="http://www.ryanderr.dev/en/tags/aws">AWS</a></span><span class="tag"><a href="http://www.ryanderr.dev/en/tags/hashicorp">HashiCorp</a></span><span class="tag"><a href="http://www.ryanderr.dev/en/tags/boundary">Boundary</a></span><span class="tag"><a href="http://www.ryanderr.dev/en/tags/ec2">EC2</a></span><span class="tag"><a href="http://www.ryanderr.dev/en/tags/hcp">HCP</a></span><span class="tag"><a href="http://www.ryanderr.dev/en/tags/cassandra">Cassandra</a></span><span class="tag"><a href="http://www.ryanderr.dev/en/tags/database">Database</a></span><span class="tag"><a href="http://www.ryanderr.dev/en/tags/security">Security</a></span><span class="tag"><a href="http://www.ryanderr.dev/en/tags/terraform">Terraform</a></span></p>
+<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>1118 Words
+    |
+    
+    
+    
+    5 Minutes, 4 Seconds</p>
+<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2025-07-24 10:00 -0500</p></div>
+			<hr class="post-end">
+			<div class="content">
+				<p>While building a project with a full AWS stack, I needed Cassandra as my database solution. Initially, I looked into AWS Keyspaces (Amazon&rsquo;s managed Cassandra service), but discovered it doesn&rsquo;t offer a way to keep your service endpoints truly private. In lieu of this, I decided to self-host a Cassandra DB instance on a private EC2 instance, allowing me to set my ingress and egress through a private IP. However, this exposed a new challenge: how do you securely access and manage a database that you&rsquo;ve intentionally made unreachable from the internet?</p>
+<p>The traditional solutions like VPNs or bastion hosts felt too loose since I didn&rsquo;t want to grant broad network access just to reach one database. After exploring various options, I made my choice, HashiCorp Boundary, which turned out to be exactly what I needed for secure, identity-based access to private resources.</p>
+<h2 id="the-challenge">The Challenge<a href="#the-challenge" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<p>Traditional approaches to securing database access often involve:</p>
+<ul>
+<li>VPNs that provide overly broad network access</li>
+<li>Bastion hosts that become single points of failure</li>
+<li>Shared credentials that are difficult to rotate and audit</li>
+</ul>
+<p>HashiCorp Boundary solves these challenges by providing just-in-time, identity-based access to specific resources.</p>
+<h2 id="what-is-hashicorp-boundary">What is HashiCorp Boundary<a href="#what-is-hashicorp-boundary" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<p>HashiCorp Boundary is a remote access solution that acts as an identity-aware proxy, creating secure tunnels between users and target systems. It operates as a control plane that manages workers deployed across your infrastructure, establishing encrypted connections to target machines/services. Boundary supports multiple authentication backends including OIDC, LDAP, and username/password, allowing integration with existing identity providers. The platform provides additional features such as session recording, real-time monitoring, and audit logs for compliance and security oversight.</p>
+<h2 id="solution-overview">Solution Overview<a href="#solution-overview" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<p>Using HCP Boundary with self-managed workers, we can create a secure proxy architecture that:</p>
+<ul>
+<li><strong>Eliminates credential sharing</strong> - Access is identity-based, not credential-based</li>
+<li><strong>Provides zero-trust access</strong> - Resources remain private by default</li>
+<li><strong>Supports dynamic authorization</strong> - Permissions can be granted just-in-time</li>
+</ul>
+<h2 id="demo-architecture">Demo Architecture<a href="#demo-architecture" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<p>I&rsquo;ve created a Terraform demo that showcases this pattern using AWS and Apache Cassandra. The Terraform automates the entire infrastructure provisioning and configuration process, including EC2 instances with proper security groups, Boundary worker installation, and Cassandra setup with authentication enabled. This setup leverages controller-led registration, which is a feature of HashiCorp Boundary that allows for controller-based worker discovery and connection. This method eliminates manual worker configuration steps, uses HCP-generated activation tokens for secure registration, and automatically applies worker tags for easy target identification. After applying Terraform, you should see the following:</p>
+<h3 id="infrastructure-components">Infrastructure Components<a href="#infrastructure-components" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<ul>
+<li><strong>VPC with public/private subnets</strong> - Proper network isolation</li>
+<li><strong>Boundary Worker (EC2)</strong> - Self-managed worker in public subnet for external connectivity</li>
+<li><strong>Cassandra Database (EC2)</strong> - Private database instance with no direct internet access</li>
+<li><strong>Security Groups</strong> - Strict network controls allowing only necessary traffic</li>
+<li><strong>NAT Gateway</strong> - Controlled outbound access for private resources</li>
+</ul>
+<h3 id="boundary-configuration">Boundary Configuration<a href="#boundary-configuration" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<ul>
+<li><strong>Controller-led registration</strong> - Automated worker registration with HCP Boundary</li>
+<li><strong>Worker tags</strong> - Proper tagging for target filtering to ensure that the worker with access to the target is the one that is used to proxy traffic</li>
+</ul>
+<h2 id="architecture-overview">Architecture Overview<a href="#architecture-overview" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<p>The following diagram illustrates the complete architecture and data flow for accessing a private Cassandra database through HCP Boundary with self-managed workers:</p>
+<p><img src="boundary-cassandra-architecture.png" alt="HCP Boundary Cassandra Architecture"></p>
+<h2 id="prerequisites">Prerequisites<a href="#prerequisites" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<p>Before running the demo, you&rsquo;ll need:</p>
+<ol>
+<li><strong>AWS Account</strong> with permissions to create VPC, EC2, and networking resources</li>
+<li><strong>AWS CLI</strong> configured with valid credentials</li>
+<li><strong>Terraform</strong> v1.12.2 or later installed</li>
+<li><strong>HCP Boundary Cluster</strong> with admin access</li>
+<li><strong>cqlsh</strong> installed locally for connecting to Cassandra</li>
+<li><strong>AWS Key Pair</strong> for SSH access and EC2 standup</li>
+</ol>
+<h2 id="quick-start">Quick Start<a href="#quick-start" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git clone https://github.com/RyanDerr/boundary-cassandra-terraform
+</span></span><span style="display:flex;"><span>cd boundary-cassandra-terraform
+</span></span><span style="display:flex;"><span>cp terraform.tfvars.example terraform.tfvars
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Edit terraform.tfvars to suit your configuration</span>
+</span></span><span style="display:flex;"><span>terraform init
+</span></span><span style="display:flex;"><span>terraform apply
+</span></span></code></pre></div><p>The deployment creates all necessary infrastructure and automatically:</p>
+<ul>
+<li>Registers the worker with your HCP Boundary cluster</li>
+<li>Configures Cassandra with authentication enabled</li>
+<li>Sets up proper network security and routing</li>
+</ul>
+<h3 id="outputs">Outputs<a href="#outputs" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<p>After successful deployment, Terraform provides:</p>
+<ul>
+<li>Boundary worker public IP and connection details already registered to your HCP Boundary cluster</li>
+<li>Cassandra EC2 setup and running with private IP for target configuration</li>
+<li>Worker tags for setting up Boundary targets</li>
+<li>Security group IDs and VPC information</li>
+</ul>
+<h2 id="connecting-to-cassandra-via-boundary">Connecting to Cassandra via Boundary<a href="#connecting-to-cassandra-via-boundary" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<p>Once your infrastructure is deployed, you can connect to the private Cassandra instance using Boundary. Here&rsquo;s how to set up and use the connection:</p>
+<h3 id="setting-up-the-boundary-target">Setting Up the Boundary Target<a href="#setting-up-the-boundary-target" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<ol>
+<li>
+<p><strong>Create a Target</strong> directly in your HCP Boundary console:</p>
+<ul>
+<li>Navigate to Targets</li>
+<li>Click &ldquo;New Target&rdquo;</li>
+<li><strong>Type</strong>: TCP</li>
+<li><strong>Name</strong>: <code>cassandra-db</code></li>
+<li><strong>Default Port</strong>: 9042 (Cassandra&rsquo;s native protocol port)</li>
+<li><strong>Address</strong>: Enter the Cassandra private IP address (from Terraform outputs)</li>
+<li><strong>Worker Filter</strong>: Use tags to specify which worker should handle connections
+<pre tabindex="0"><code>&#34;cassandra-access&#34; in &#34;/tags/type&#34;
+</code></pre></li>
+<li><strong>Session Connection Limit</strong>: 1 (or as needed)</li>
+<li><strong>Alias</strong>: <code>cassandra-db</code> for an easy to remember name when issuing the command to connect to the target</li>
+</ul>
+</li>
+<li>
+<p><strong>Configure Static Credentials</strong>:</p>
+<ul>
+<li>Navigate to Credential Stores</li>
+<li>Create a new Static Credential Store</li>
+<li>Add username/password credentials for Cassandra authentication
+<ul>
+<li>By default Cassandra uses cassandra/cassandra</li>
+</ul>
+</li>
+<li>Attach the credential to your target</li>
+</ul>
+</li>
+</ol>
+<h3 id="connecting-via-boundary-cli">Connecting via Boundary CLI<a href="#connecting-via-boundary-cli" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<p>With your target and alias configured, connect to Cassandra:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Set the HCP Boundary cluster address</span>
+</span></span><span style="display:flex;"><span>export BOUNDARY_ADDR<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://your-cluster-id.boundary.hashicorp.cloud&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Set the authentication method ID</span>
+</span></span><span style="display:flex;"><span>export BOUNDARY_AUTH_METHOD_ID<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;ampw_1234567890&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Connect using the alias</span>
+</span></span><span style="display:flex;"><span>boundary connect cassandra cassandra-db
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Alternative: Connect to a specific keyspace</span>
+</span></span><span style="display:flex;"><span>boundary connect cassandra cassandra-db -keyspace system
+</span></span></code></pre></div><p>The <code>boundary connect cassandra</code> command will:</p>
+<ul>
+<li>Establish a secure tunnel through the designated worker</li>
+<li>Automatically inject the configured static credentials</li>
+<li>Launch a cqlsh session connected to your private Cassandra instance</li>
+</ul>
+<h3 id="example-connection-flow">Example Connection Flow<a href="#example-connection-flow" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ boundary connect cassandra cassandra-db
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Connected to Ryan EC2 Cluster at 127.0.0.1:55005.
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>cqlsh 6.0.0 | Cassandra 4.0.0 | CQL spec 3.4.5 | Native protocol v4<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>Use HELP <span style="color:#66d9ef">for</span> help.
+</span></span><span style="display:flex;"><span>cassandra@cqlsh&gt;
+</span></span></code></pre></div><h3 id="verifying-the-connection">Verifying the Connection<a href="#verifying-the-connection" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<p>Once connected, you can verify your Cassandra access:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cql" data-lang="cql"><span style="display:flex;"><span><span style="color:#75715e">-- Check cluster information
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">SELECT</span> cluster_name <span style="color:#66d9ef">FROM</span> system.local;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- List keyspaces
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>DESCRIBE <span style="color:#66d9ef">keyspaces</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Create a test keyspace
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">KEYSPACE</span> test_boundary <span style="color:#66d9ef">WITH</span> <span style="color:#66d9ef">replication</span> <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#39;class&#39;</span>: <span style="color:#e6db74">&#39;SimpleStrategy&#39;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#39;replication_factor&#39;</span>: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Use the keyspace
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">USE</span> test_boundary;
+</span></span></code></pre></div><h3 id="session-management">Session Management<a href="#session-management" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<p>Boundary provides excellent session visibility:</p>
+<ul>
+<li>View active sessions in the HCP Boundary console</li>
+<li>Monitor connection duration and usage</li>
+<li>Terminate sessions as needed for security compliance</li>
+<li>Review session logs and audit trails</li>
+</ul>
+<h2 id="important-limitation">Important Limitation<a href="#important-limitation" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<p><strong>Authentication Support</strong>: Currently, Boundary only supports Cassandra&rsquo;s <code>PasswordAuthenticator</code></p>
+<p>This limitation is important to consider when integrating Boundary with existing Cassandra clusters that may use different authentication mechanisms.</p>
+<h2 id="conclusion">Conclusion<a href="#conclusion" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<p>HCP Boundary with self-managed workers provides a solution for securing access to private database resources without the complexity of VPNs or bastion hosts. This demo showcases how modern zero-trust patterns can be implemented with minimal infrastructure overhead.</p>
+<p>Ready to try it yourself? Check out my <a href="https://github.com/RyanDerr/boundary-cassandra-terraform">demo repository</a> and start securing your database access today.</p>
+<blockquote>
+<p><strong>Note</strong>: The <code>boundary connect cassandra</code> command is currently in testing phase and not yet released in a major or minor version as of this blog post&rsquo;s publication date. Check the <a href="https://developer.hashicorp.com/boundary/docs/release-notes">Boundary release notes</a> for the latest availability.</p></blockquote>
+
+			</div>
+
+<div class="related-posts thin">
+	<h2>See Also</h2>
+	<ul>
+	
+	<li><a href="/en/posts/aws-wireguard-vpn-terraform/">AWS Wireguard Vpn Via Terraform</a></li>
+	
+	<li><a href="/en/posts/aws-terraform-github-auth/">Leveraging AWS Roles for Enhanced Security in GitHub Workflows</a></li>
+	
+	<li><a href="/en/posts/aws-psql-rds-iam-auth/">AWS Postgres RDS IAM Authentication</a></li>
+	
+	<li><a href="/en/posts/aws-ec2-shutdown-efficiency/">AWS ECS Faster &amp; Prolonged Shutdown Efficiency</a></li>
+	
+	</ul>
+</div>
+
+		</article>
+		<aside id="toc">
+			<div class="toc-title">Table of Contents</div>
+			<nav id="TableOfContents">
+  <ul>
+    <li><a href="#the-challenge">The Challenge</a></li>
+    <li><a href="#what-is-hashicorp-boundary">What is HashiCorp Boundary</a></li>
+    <li><a href="#solution-overview">Solution Overview</a></li>
+    <li><a href="#demo-architecture">Demo Architecture</a>
+      <ul>
+        <li><a href="#infrastructure-components">Infrastructure Components</a></li>
+        <li><a href="#boundary-configuration">Boundary Configuration</a></li>
+      </ul>
+    </li>
+    <li><a href="#architecture-overview">Architecture Overview</a></li>
+    <li><a href="#prerequisites">Prerequisites</a></li>
+    <li><a href="#quick-start">Quick Start</a>
+      <ul>
+        <li><a href="#outputs">Outputs</a></li>
+      </ul>
+    </li>
+    <li><a href="#connecting-to-cassandra-via-boundary">Connecting to Cassandra via Boundary</a>
+      <ul>
+        <li><a href="#setting-up-the-boundary-target">Setting Up the Boundary Target</a></li>
+        <li><a href="#connecting-via-boundary-cli">Connecting via Boundary CLI</a></li>
+        <li><a href="#example-connection-flow">Example Connection Flow</a></li>
+        <li><a href="#verifying-the-connection">Verifying the Connection</a></li>
+        <li><a href="#session-management">Session Management</a></li>
+      </ul>
+    </li>
+    <li><a href="#important-limitation">Important Limitation</a></li>
+    <li><a href="#conclusion">Conclusion</a></li>
+  </ul>
+</nav>
+		</aside>
+		<div class="post-nav thin">
+			<a class="prev-post" href="http://www.ryanderr.dev/en/posts/aws-psql-rds-iam-auth/">
+				<span class="post-nav-label">Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span><br><span>AWS Postgres RDS IAM Authentication</span>
+			</a>
+		</div>
+		<div id="comments" class="thin"></div>
+	</main>
+
+<footer id="site-footer" class="section-inner thin animated fadeIn faster">
+	<p>
+		&copy; 2025 <a href="http://www.ryanderr.dev/">Ryan Derr</a>
+		&#183; CC BY-NC 4.0
+		
+		&#183; <a href="http://www.ryanderr.dev/en/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
+		
+	</p>
+
+</footer>
+<script async src="http://www.ryanderr.dev/js/bundle.min.038214de9d568246fadcfeb06c69349925de3209f332ec123861b6aa031d63c6.js" integrity="sha256-A4IU3p1Wgkb63P6wbGk0mSXeMgnzMuwSOGG2qgMdY8Y=" crossorigin="anonymous"></script>
+</body>
+
+</html>

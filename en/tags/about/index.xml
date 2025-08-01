@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>About on Ryan Derr&#39;s Blog</title>
+    <link>http://www.ryanderr.dev/en/tags/about/</link>
+    <description>Recent content in About on Ryan Derr&#39;s Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 17 Mar 2024 14:41:01 -0500</lastBuildDate>
+    <atom:link href="http://www.ryanderr.dev/en/tags/about/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>About Me</title>
+      <link>http://www.ryanderr.dev/en/about/</link>
+      <pubDate>Sun, 17 Mar 2024 14:41:01 -0500</pubDate>
+      <guid>http://www.ryanderr.dev/en/about/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;&#xA;&lt;p&gt;My name is James Derr, but I&amp;rsquo;m more commonly known as Ryan. I am a dedicated software engineer with a passion for continuous learning and knowledge sharing. When I&amp;rsquo;m not coding, I enjoy outdoor activities such as bouldering and paddle boarding, and I&amp;rsquo;m also an avid participant in Dungeons and Dragons campaigns.&lt;/p&gt;&#xA;&lt;h2 id=&#34;professional-experience&#34;&gt;Professional Experience&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Software Engineer At HashiCorp&lt;/li&gt;&#xA;&lt;li&gt;Software Engineer at General Motors&lt;/li&gt;&#xA;&lt;li&gt;Database Administrator at Paycom Payroll&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h2 id=&#34;technical-skills&#34;&gt;Technical Skills&lt;/h2&gt;&#xA;&lt;h3 id=&#34;programming-languages&#34;&gt;Programming Languages&lt;/h3&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Java&lt;/li&gt;&#xA;&lt;li&gt;Go&lt;/li&gt;&#xA;&lt;li&gt;Python&lt;/li&gt;&#xA;&lt;li&gt;TypeScript&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h3 id=&#34;cloud-platforms&#34;&gt;Cloud Platforms&lt;/h3&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Azure&lt;/li&gt;&#xA;&lt;li&gt;AWS&lt;/li&gt;&#xA;&lt;li&gt;DigitalOcean&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h3 id=&#34;tools-and-frameworks&#34;&gt;Tools and Frameworks&lt;/h3&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Spring&lt;/li&gt;&#xA;&lt;li&gt;Quarkus&lt;/li&gt;&#xA;&lt;li&gt;Apache Camel&lt;/li&gt;&#xA;&lt;li&gt;SQL&lt;/li&gt;&#xA;&lt;li&gt;Kafka&lt;/li&gt;&#xA;&lt;li&gt;Git&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h3 id=&#34;development-lifecycle&#34;&gt;Development Lifecycle&lt;/h3&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Kubernetes&lt;/li&gt;&#xA;&lt;li&gt;Docker&lt;/li&gt;&#xA;&lt;li&gt;Terraform&lt;/li&gt;&#xA;&lt;li&gt;ArgoCD&lt;/li&gt;&#xA;&lt;li&gt;Helm&lt;/li&gt;&#xA;&lt;li&gt;CI/CD Pipelines&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
+    </item>
+  </channel>
+</rss>
